@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block title %}{{ product.name }} - Markethub{% endblock %}
+{% block content %}
+    <h1 class="mb-4">{{ product.name }}</h1>
+    <div class="card mb-4">
+        <div class="card-body">
+            {% if product.main_image %}
+                <img src="{{ product.main_image.url }}" alt="{{ product.name }}" style="max-height: 300px; object-fit: cover;" class="mb-3">
+            {% endif %}
+            <p><strong>Магазин:</strong> <a href="{% url 'shops:shop_detail' product.shop.pk %}">{{ product.shop.name }}</a></p>
+            <p><strong>Цена:</strong> {{ product.price }} ₽</p>
+            <p><strong>Рейтинг:</strong> {{ product.rating|floatformat:2 }}</p>
+            <p><strong>Описание:</strong> {{ product.description }}</p>
+            <p><strong>Количество на складе:</strong> {{ product.stock }}</p>
+            {% if product.images.exists %}
+                <h5>Дополнительные изображения</h5>
+                <div class="row">
+                    {% for image in product.images.all %}
+                        <div class="col-md-3 mb-3">
+                            <img src="{{ image.image.url }}" alt="{{ product.name }}" class="img-fluid" style="max-height: 100px;">
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+            <a href="{% url 'products:product_list' %}" class="btn btn-primary">Заказать</a>
+        </div>
+    </div>
+{% endblock %}

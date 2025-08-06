@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block title %}Модерация магазина {{ moderation_request.shop.name }}{% endblock %}
+{% block content %}
+    <h1 class="mb-4">Модерация магазина {{ moderation_request.shop.name }}</h1>
+    <div class="card mb-4">
+        <div class="card-body">
+            <p><strong>Название:</strong> {{ moderation_request.shop.name }}</p>
+            <p><strong>Описание:</strong> {{ moderation_request.shop.description }}</p>
+            {% if moderation_request.shop.logo %}
+                <p><strong>Логотип:</strong> <img src="{{ moderation_request.shop.logo.url }}" alt="{{ moderation_request.shop.name }}" style="max-height: 100px;"></p>
+            {% endif %}
+            <p><strong>Владелец:</strong> {{ moderation_request.shop.owner.email }}</p>
+            <p><strong>Дата подачи:</strong> {{ moderation_request.submitted_at }}</p>
+            <form method="post">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <button type="submit" class="btn btn-primary mt-3">Сохранить</button>
+                <a href="{% url 'shops:shop_list' %}" class="btn btn-secondary mt-3">Назад</a>
+            </form>
+        </div>
+    </div>
+{% endblock %}

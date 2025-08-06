@@ -1,23 +1,43 @@
 {% extends 'base.html' %}
-{% block title %}Профиль{% endblock %}
+{% block title %}Профиль - {{ user.email }}{% endblock %}
 {% block content %}
-    <div class="container">
-        <h1 class="mb-4">Профиль</h1>
-        <div class="card">
-            <div class="card-body">
-                <h5 class="card-title">Личные данные</h5>
-                <p><strong>Электронная почта:</strong> {{ request.user.email }}</p>
-                <p><strong>Имя:</strong> {{ profile.first_name|default:"Не указано" }}</p>
-                <p><strong>Фамилия:</strong> {{ profile.last_name|default:"Не указано" }}</p>
-                <p><strong>Телефон:</strong> {{ profile.phone|default:"Не указано" }}</p>
-                <p><strong>Адрес (строка 1):</strong> {{ profile.address1|default:"Не указано" }}</p>
-                <p><strong>Адрес (строка 2):</strong> {{ profile.address2|default:"Не указано" }}</p>
-                <p><strong>Город:</strong> {{ profile.city|default:"Не указано" }}</p>
-                <p><strong>Страна:</strong> {{ profile.country|default:"Не указано" }}</p>
-                <p><strong>Регион:</strong> {{ profile.province|default:"Не указано" }}</p>
-                <p><strong>Роль:</strong> {{ profile.get_role_display }}</p>
-                <a href="{% url 'users:profile_edit' %}" class="btn btn-primary mt-3">Редактировать профиль</a>
-            </div>
+    <h1 class="mb-4">Профиль пользователя</h1>
+    <div class="card mb-4">
+        <div class="card-body">
+            <p><strong>Email:</strong> {{ user.email }}</p>
+            <p><strong>Роль:</strong> {{ profile.get_role_display }}</p>
+            <p><strong>Имя:</strong> {{ profile.first_name|default:"Не указано" }}</p>
+            <p><strong>Фамилия:</strong> {{ profile.last_name|default:"Не указано" }}</p>
+            <p><strong>Телефон:</strong> {{ profile.phone|default:"Не указано" }}</p>
+            <p><strong>Адрес:</strong> {{ profile.address1|default:"" }} {{ profile.address2|default:"" }} {{ profile.city|default:"" }} {{ profile.country|default:"" }} {{ profile.province|default:"" }}</p>
+            <a href="{% url 'users:profile_edit' %}" class="btn btn-secondary">Редактировать профиль</a>
+            {% if profile.role == 'buyer' %}
+                <a href="{% url 'users:become_seller' %}" class="btn btn-primary">Стать продавцом</a>
+            {% endif %}
         </div>
     </div>
+    {% if profile.role == 'seller' %}
+        <h2>Ваши магазины</h2>
+        {% if user.shops.exists %}
+            {% for shop in user.shops.all %}
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ shop.name }}</h5>
+                        <p><strong>Статус:</strong> {{ shop.get_status_display }}</p>
+                        <p><strong>Описание:</strong> {{ shop.description }}</p>
+                        {% if shop.logo %}
+                            <img src="{{ shop.logo.url }}" alt="{{ shop.name }}" style="max-height: 100px;">
+                        {% endif %}
+                        <a href="{% url 'shops:shop_detail' shop.pk %}" class="btn btn-primary">Перейти в магазин</a>
+                        {% if shop.status == 'approved' %}
+                            <a href="{% url 'products:product_create' %}" class="btn btn-success">Добавить товар</a>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p>У вас нет магазинов.</p>
+            <a href="{% url 'shops:shop_create' %}" class="btn btn-primary">Создать магазин</a>
+        {% endif %}
+    {% endif %}
 {% endblock %}

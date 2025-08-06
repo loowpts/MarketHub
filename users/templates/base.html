@@ -21,7 +21,7 @@
                         <a class="nav-link" href="{% url 'shops:shop_list' %}">Магазины</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#">Товары</a>
+                        <a class="nav-link" href="{% url 'products:product_list' %}">Товары</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="#">Корзина ({{ cart_items_count|default:0 }})</a>
@@ -32,8 +32,8 @@
                         </li>
                     {% endif %}
                 </ul>
-                <form class="d-flex" action="#" method="get">
-                    <input class="form-control me-2" type="search" name="q" placeholder="Поиск товаров" aria-label="Search">
+                <form class="d-flex" action="{% url 'products:product_list' %}" method="get">
+                    <input class="form-control me-2 dotted-input" type="search" name="q" placeholder="Поиск товаров" aria-label="Search">
                     <button class="btn btn-outline-success" type="submit">Поиск</button>
                 </form>
                 <ul class="navbar-nav ms-3">
@@ -41,15 +41,6 @@
                         <li class="nav-item">
                             <a class="nav-link" href="{% url 'users:profile' %}">Профиль</a>
                         </li>
-                        {% if user.profile.role == 'seller' %}
-                            <li class="nav-item">
-                                <a class="nav-link" href="{% url 'shops:shop_create' %}">Создать магазин</a>
-                            </li>
-                        {% else %}
-                            <li class="nav-item">
-                                <a class="nav-link" href="{% url 'users:become_seller' %}">Стать продавцом</a>
-                            </li>
-                        {% endif %}
                         <li class="nav-item">
                             <a class="nav-link" href="{% url 'users:logout' %}">Выйти</a>
                         </li>

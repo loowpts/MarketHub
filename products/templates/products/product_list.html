@@ -1,18 +1,13 @@
 {% extends 'base.html' %}
-{% block title %}{{ shop.name }} - Markethub{% endblock %}
+{% block title %}Товары - Markethub{% endblock %}
 {% block content %}
-    <h1 class="mb-4">{{ shop.name }}</h1>
-    <div class="card mb-4">
-        <div class="card-body">
-            {% if shop.logo %}
-                <img src="{{ shop.logo.url }}" alt="{{ shop.name }}" style="max-height: 100px;" class="mb-3">
-            {% endif %}
-            <p><strong>Описание:</strong> {{ shop.description }}</p>
-            <p><strong>Рейтинг:</strong> {{ shop.rating|floatformat:2 }}</p>
-            <p><strong>Владелец:</strong> {{ shop.owner.email }}</p>
+    <h1 class="mb-4">Товары</h1>
+    <form method="get" class="mb-4">
+        <div class="input-group">
+            <input type="text" name="q" value="{{ query }}" class="form-control dotted-input" placeholder="Поиск товаров...">
+            <button type="submit" class="btn btn-primary">Найти</button>
         </div>
-    </div>
-    <h2>Товары магазина</h2>
+    </form>
     <div class="row">
         {% for product in products %}
             <div class="col-md-4 mb-4">
@@ -24,6 +19,7 @@
                     {% endif %}
                     <div class="card-body">
                         <h5 class="card-title">{{ product.name }}</h5>
+                        <p class="card-text">Магазин: <a href="{% url 'shops:shop_detail' product.shop.pk %}">{{ product.shop.name }}</a></p>
                         <p class="card-text">Цена: {{ product.price }} ₽</p>
                         <p class="card-text">Рейтинг: {{ product.rating|floatformat:2 }}</p>
                         <a href="{% url 'products:product_detail' product.pk %}" class="btn btn-primary">Заказать</a>
@@ -31,7 +27,7 @@
                 </div>
             </div>
         {% empty %}
-            <p>В этом магазине пока нет товаров.</p>
+            <p>Товаров пока нет.</p>
         {% endfor %}
     </div>
 {% endblock %}

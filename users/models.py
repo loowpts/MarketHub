@@ -1,18 +1,21 @@
 from django.db import models
-from django.contrib.auth import get_user_model
+from django.contrib.auth.models import AbstractUser
 
-User = get_user_model()
+class User(AbstractUser):
+    email = models.EmailField(unique=True, max_length=254, verbose_name='Электронная почта')
+    username = models.CharField(max_length=150, unique=True, verbose_name='Имя пользователя')
 
-from django.db import models
-from django.contrib.auth import get_user_model
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['username']
 
-User = get_user_model()
+    def __str__(self):
+        return self.email
 
 class UserProfile(models.Model):
     ROLE_CHOICES = (
-    ('buyer', 'Покупатель'),
-    ('seller', 'Продавец'),
-    ('admin', 'Администратор'),
+        ('buyer', 'Покупатель'),
+        ('seller', 'Продавец'),
+        ('admin', 'Администратор'),
     )
     user = models.OneToOneField(
         User,

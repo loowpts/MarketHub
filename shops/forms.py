@@ -1,8 +1,6 @@
 from django import forms
-from django.contrib.auth import get_user_model
 from .models import Shop, ShopModerationRequest
-
-User = get_user_model()
+from users.models import User
 
 class ShopForm(forms.ModelForm):
     class Meta:
@@ -24,4 +22,4 @@ class ShopModerationForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['moderator'].queryset = User.objects.filter(is_staff=True)
+        self.fields['moderator'].queryset = User.objects.filter(profile__role='admin')

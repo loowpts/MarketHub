@@ -4,9 +4,11 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.contrib.auth.forms import AuthenticationForm
 from .forms import CustomUserCreationForm, UserProfileForm
+from products.models import Product
 
 def index_view(request):
-    return render(request, 'users/index.html')
+    products = Product.objects.filter(shop__status='approved').order_by('-created_at')[:12]
+    return render(request, 'users/index.html', {'products': products})
 
 def register_view(request):
     if request.method == 'POST':
@@ -44,8 +46,9 @@ def logout_view(request):
 
 @login_required
 def profile_view(request):
-    profile = request.user.profile
-    return render(request, 'users/profile.html', {'profile': profile})
+    profile = request.user.profile 
+    form = UserProfileForm(instance=profile)
+    return render(request, 'users/profile.html', {'profile': profile, 'form': form})
 
 @login_required
 def profile_edit_view(request):
@@ -65,9 +68,12 @@ def profile_edit_view(request):
 @login_required
 def become_seller(request):
     profile = request.user.profile
+    if profile.role == 'seller':
+        messages.error(request, 'Вы уже продавец.')
+        return redirect('users:profile')
     if request.method == 'POST':
         profile.role = 'seller'
         profile.save()
         messages.success(request, 'Вы стали продавцом! Теперь вы можете создать магазин.')
-        return redirect('users:index')
+        return redirect('users:profile')
     return render(request, 'users/become_seller.html', {})

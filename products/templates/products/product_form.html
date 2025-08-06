@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block title %}Создать товар{% endblock %}
+{% block content %}
+    <h1 class="mb-4">Создать товар</h1>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5>Основные данные</h5>
+                {{ form.as_p }}
+                <h5 class="mt-4">Дополнительные изображения</h5>
+                {{ formset.management_form }}
+                {% for form in formset %}
+                    <div class="form-group mb-3">
+                        {{ form.image }}
+                    </div>
+                {% endfor %}
+                <button type="submit" class="btn btn-primary">Создать</button>
+                <a href="{% url 'users:profile' %}" class="btn btn-secondary">Отмена</a>
+            </div>
+        </form>
+    </div>
+{% endblock %}
