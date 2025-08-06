@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block title %}Магазин {{ shop.name }}{% endblock %}
+{% block content %}
+    <div class="container">
+        <h1 class="mb-4">{{ shop.name }}</h1>
+        <div class="card">
+            <div class="card-body">
+                {% if shop.logo %}
+                    <img src="{{ shop.logo.url }}" class="img-fluid mb-3" alt="{{ shop.name }}" style="max-height: 300px;">
+                {% else %}
+                    <div class="bg-light mb-3" style="height: 300px; display: flex; align-items: center; justify-content: center;">
+                        <span>Нет логотипа</span>
+                    </div>
+                {% endif %}
+                <p><strong>Описание:</strong> {{ shop.description }}</p>
+                <p><strong>Владелец:</strong> {{ shop.owner.email }}</p>
+                <p><strong>Рейтинг:</strong> {{ shop.rating }}</p>
+                <p><strong>Статус:</strong> {{ shop.get_status_display }}</p>
+                {% if shop.status != 'approved' %}
+                    <div class="alert alert-info">Магазин находится на модерации и еще не одобрен.</div>
+                {% endif %}
+                {% if user.is_authenticated and user.profile.role == 'seller' and user == shop.owner %}
+                    <a href="{% url 'shops:shop_create' %}" class="btn btn-primary mt-3">Редактировать магазин</a>
+                {% endif %}
+                <a href="{% url 'shops:shop_list' %}" class="btn btn-secondary mt-3">Назад к списку</a>
+            </div>
+        </div>
+    </div>
+{% endblock %}

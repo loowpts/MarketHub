@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block title %}Список магазинов{% endblock %}
+{% block content %}
+    <div class="container">
+        <h1 class="mb-4">Магазины</h1>
+        {% if shops %}
+            <div class="row">
+                {% for shop in shops %}
+                    <div class="col-md-4 mb-3">
+                        <div class="card">
+                            {% if shop.logo %}
+                                <img src="{{ shop.logo.url }}" class="card-img-top" alt="{{ shop.name }}" style="height: 200px; object-fit: cover;">
+                            {% else %}
+                                <div class="card-img-top bg-light" style="height: 200px; display: flex; align-items: center; justify-content: center;">
+                                    <span>Нет логотипа</span>
+                                </div>
+                            {% endif %}
+                            <div class="card-body">
+                                <h5 class="card-title">{{ shop.name }}</h5>
+                                <p class="card-text">{{ shop.description|truncatewords:30 }}</p>
+                                <p class="card-text">Рейтинг: {{ shop.rating }}</p>
+                                <a href="{% url 'shops:shop_detail' pk=shop.pk %}" class="btn btn-primary">Подробнее</a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p>Пока нет одобренных магазинов.</p>
+        {% endif %}
+    </div>
+{% endblock %}

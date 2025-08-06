@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block title %}Создать магазин{% endblock %}
+{% block content %}
+    <div class="container">
+        <h1 class="mb-4">Создать магазин</h1>
+        <form method="post" enctype="multipart/form-data" class="w-50">
+            {% csrf_token %}
+            {{ form.as_p }}
+            {% if form.non_field_errors %}
+                <div class="text-danger">{{ form.non_field_errors }}</div>
+            {% endif %}
+            <button type="submit" class="btn btn-primary mt-3">Создать</button>
+        </form>
+    </div>
+{% endblock %}

@@ -18,7 +18,7 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="#">Магазины</a>
+                        <a class="nav-link" href="{% url 'shops:shop_list' %}">Магазины</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="#">Товары</a>
@@ -43,7 +43,7 @@
                         </li>
                         {% if user.profile.role == 'seller' %}
                             <li class="nav-item">
-                                <a class="nav-link" href="#">Создать магазин</a>
+                                <a class="nav-link" href="{% url 'shops:shop_create' %}">Создать магазин</a>
                             </li>
                         {% else %}
                             <li class="nav-item">
