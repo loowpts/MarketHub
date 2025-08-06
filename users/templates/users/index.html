@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block title %}Главная{% endblock %}
+{% block content %}
+    <div class="container">
+        <h1 class="mb-4">Добро пожаловать в Markethub!</h1>
+        <p>Здесь вы можете зарегистрироваться или войти, чтобы начать покупки.</p>
+        <div class="row">
+            {% if user.is_authenticated %}
+                <div class="col-md-6">
+                    <a href="{% url 'users:profile' %}" class="btn btn-primary btn-lg w-100 mb-3">Перейти в профиль</a>
+                </div>
+                <div class="col-md-6">
+                    <a href="#" class="btn btn-secondary btn-lg w-100 mb-3">Посмотреть товары</a>
+                </div>
+            {% else %}
+                <div class="col-md-6">
+                    <a href="{% url 'users:register' %}" class="btn btn-primary btn-lg w-100 mb-3">Регистрация</a>
+                </div>
+                <div class="col-md-6">
+                    <a href="{% url 'users:login' %}" class="btn btn-secondary btn-lg w-100 mb-3">Войти</a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}
