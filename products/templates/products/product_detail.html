@@ -22,7 +22,11 @@
                     {% endfor %}
                 </div>
             {% endif %}
-            <a href="{% url 'products:product_list' %}" class="btn btn-primary">Заказать</a>
+            {% if product.stock > 0 %}
+                <a href="{% url 'orders:cart_add' product.pk %}" class="btn btn-primary">Добавить в корзину</a>
+            {% else %}
+                <p class="text-danger">Товара нет в наличии</p>
+            {% endif %}
         </div>
     </div>
 {% endblock %}

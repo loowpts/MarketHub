@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block title %}Корзина - Markethub{% endblock %}
+{% block content %}
+    <h1 class="mb-4">Корзина</h1>
+    {% if items %}
+        <div class="row">
+            {% for item in items %}
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ item.product.name }}</h5>
+                            <p><strong>Магазин:</strong> <a href="{% url 'shops:shop_detail' item.product.shop.pk %}">{{ item.product.shop.name }}</a></p>
+                            <p><strong>Цена за единицу:</strong> {{ item.product.price }} ₽</p>
+                            <p><strong>Количество:</strong> {{ item.quantity }}</p>
+                            <p><strong>Итого:</strong> {{ item.total|floatformat:2 }} ₽</p> {# Изменено: используем item.total #}
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        <h4>Общая сумма: {{ total_price|floatformat:2 }} ₽</h4>
+        <a href="{% url 'orders:order_create' %}" class="btn btn-primary">Оформить заказ</a>
+        <a href="{% url 'orders:cart_clear' %}" class="btn btn-danger">Очистить корзину</a>
+    {% else %}
+        <p>Ваша корзина пуста.</p>
+        <a href="{% url 'products:product_list' %}" class="btn btn-primary">Перейти к товарам</a>
+    {% endif %}
+{% endblock %}

@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block title %}Оформить заказ - Markethub{% endblock %}
+{% block content %}
+    <h1 class="mb-4">Оформить заказ</h1>
+    {% if cart.items.exists %}
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5>Содержимое корзины</h5>
+                <ul>
+                    {% for item in cart.items.all %}
+                        <li>{{ item.product.name }} ({{ item.quantity }} шт.) - {{ item.product.price }} ₽</li>
+                    {% endfor %}
+                </ul>
+                <form method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-primary">Подтвердить заказ</button>
+                    <a href="{% url 'orders:cart_detail' %}" class="btn btn-secondary">Назад в корзину</a>
+                </form>
+            </div>
+        </div>
+    {% else %}
+        <p>Ваша корзина пуста.</p>
+        <a href="{% url 'products:product_list' %}" class="btn btn-primary">Перейти к товарам</a>
+    {% endif %}
+{% endblock %}

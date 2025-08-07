@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block title %}Мои заказы - Markethub{% endblock %}
+{% block content %}
+    <h1 class="mb-4">Мои заказы</h1>
+    {% for order in orders %}
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">Заказ #{{ order.id }} ({{ order.get_status_display }})</h5>
+                <p><strong>Дата:</strong> {{ order.created_at }}</p>
+                <h6>Товары:</h6>
+                <ul>
+                    {% for item in order.items.all %}
+                        <li>
+                            <a href="{% url 'products:product_detail' item.product.pk %}">{{ item.product.name }}</a>
+                            ({{ item.quantity }} шт., {{ item.price }} ₽)
+                            - Магазин: <a href="{% url 'shops:shop_detail' item.product.shop.pk %}">{{ item.product.shop.name }}</a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    {% empty %}
+        <p>У вас пока нет заказов.</p>
+    {% endfor %}
+{% endblock %}
