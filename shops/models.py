@@ -1,6 +1,8 @@
 from django.db import models
 from django.core.exceptions import ValidationError
 from users.models import User
+from django.db.models import Avg
+
 
 class Shop(models.Model):
     STATUS_CHOICES = (
@@ -26,7 +28,9 @@ class Shop(models.Model):
         verbose_name_plural = 'Магазины'
 
     def update_rating(self):
-        pass
+        avg_rating = self.reviews.aggregate(Avg('rating'))['rating__avg'] or 0.0
+        self.rating = round(avg_rating, 2)
+        self.save()
 
     def clean(self):
         if self.owner.shops.exists() and not self.pk:
@@ -34,6 +38,8 @@ class Shop(models.Model):
 
     def __str__(self) -> str:
         return f'Магазин {self.name} - Владелец: {self.owner}'
+    
+
 
 class ShopModerationRequest(models.Model):
     STATUS_CHOICES = (

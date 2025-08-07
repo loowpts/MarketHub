@@ -27,6 +27,25 @@
             {% else %}
                 <p class="text-danger">Товара нет в наличии</p>
             {% endif %}
+            {% if user.is_authenticated %}
+                <a href="{% url 'reviews:review_create' product.pk %}" class="btn btn-secondary mt-2">Оставить отзыв</a>
+            {% endif %}
         </div>
     </div>
+    <h2 class="mb-4">Отзывы</h2>
+    {% if product.reviews.exists %}
+        {% for review in product.reviews.all %}
+            <div class="card mb-3">
+                <div class="card-body">
+                    <p><strong>{{ review.user.email }}</strong> ({{ review.rating }}/5)</p>
+                    <p>{{ review.comment|default:"Без комментария" }}</p>
+                    <p><small class="text-muted">Опубликовано: {{ review.created_at }}</small></p>
+                </div>
+            </div>
+        {% empty %}
+            <p>Отзывов пока нет.</p>
+        {% endfor %}
+    {% else %}
+        <p>Отзывов пока нет.</p>
+    {% endif %}
 {% endblock %}

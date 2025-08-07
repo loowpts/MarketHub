@@ -5,33 +5,63 @@
     <div class="card mb-4">
         <div class="card-body">
             {% if shop.logo %}
-                <img src="{{ shop.logo.url }}" alt="{{ shop.name }}" style="max-height: 100px;" class="mb-3">
+                <img src="{{ shop.logo.url }}" alt="{{ shop.name }}" style="max-height: 200px; object-fit: cover;" class="mb-3">
             {% endif %}
-            <p><strong>Описание:</strong> {{ shop.description }}</p>
+            <p><strong>Статус:</strong> {{ shop.get_status_display }}</p>
             <p><strong>Рейтинг:</strong> {{ shop.rating|floatformat:2 }}</p>
-            <p><strong>Владелец:</strong> {{ shop.owner.email }}</p>
+            <p><strong>Описание:</strong> {{ shop.description|default:"Без описания" }}</p>
+            <p><strong>Владелец:</strong> {{ shop.user.email }}</p>
+            {% if shop.status == 'approved' and user == shop.user %}
+                <a href="{% url 'products:product_create' %}" class="btn btn-success">Добавить товар</a>
+            {% endif %}
+            {% if user.is_authenticated %}
+                <a href="{% url 'reviews:shop_review_create' shop.pk %}" class="btn btn-secondary mt-2">Оставить отзыв</a>
+            {% endif %}
         </div>
     </div>
-    <h2>Товары магазина</h2>
-    <div class="row">
-        {% for product in products %}
-            <div class="col-md-4 mb-4">
-                <div class="card h-100">
-                    {% if product.main_image %}
-                        <img src="{{ product.main_image.url }}" class="card-img-top" alt="{{ product.name }}" style="height: 200px; object-fit: cover;">
-                    {% else %}
-                        <div class="card-img-top bg-secondary" style="height: 200px;"></div>
-                    {% endif %}
-                    <div class="card-body">
-                        <h5 class="card-title">{{ product.name }}</h5>
-                        <p class="card-text">Цена: {{ product.price }} ₽</p>
-                        <p class="card-text">Рейтинг: {{ product.rating|floatformat:2 }}</p>
-                        <a href="{% url 'products:product_detail' product.pk %}" class="btn btn-primary">Заказать</a>
+    <h2 class="mb-4">Товары магазина</h2>
+    {% if shop.products.exists %}
+        <div class="row">
+            {% for product in shop.products.all %}
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                <a href="{% url 'products:product_detail' product.pk %}">{{ product.name }}</a>
+                            </h5>
+                            {% if product.main_image %}
+                                <img src="{{ product.main_image.url }}" alt="{{ product.name }}" class="img-fluid mb-2" style="max-height: 150px;">
+                            {% endif %}
+                            <p><strong>Цена:</strong> {{ product.price }} ₽</p>
+                            <p><strong>Рейтинг:</strong> {{ product.rating|floatformat:2 }}</p>
+                            <p><strong>В наличии:</strong> {{ product.stock }}</p>
+                            {% if product.stock > 0 %}
+                                <a href="{% url 'orders:cart_add' product.pk %}" class="btn btn-primary">Добавить в корзину</a>
+                            {% else %}
+                                <p class="text-danger">Нет в наличии</p>
+                            {% endif %}
+                        </div>
                     </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>В магазине пока нет товаров.</p>
+    {% endif %}
+    <h2 class="mb-4">Отзывы о магазине</h2>
+    {% if shop.reviews.exists %}
+        {% for review in shop.reviews.all %}
+            <div class="card mb-3">
+                <div class="card-body">
+                    <p><strong>{{ review.user.email }}</strong> ({{ review.rating }}/5)</p>
+                    <p>{{ review.comment|default:"Без комментария" }}</p>
+                    <p><small class="text-muted">Опубликовано: {{ review.created_at }}</small></p>
                 </div>
             </div>
         {% empty %}
-            <p>В этом магазине пока нет товаров.</p>
+            <p>Отзывов пока нет.</p>
         {% endfor %}
-    </div>
+    {% else %}
+        <p>Отзывов пока нет.</p>
+    {% endif %}
 {% endblock %}

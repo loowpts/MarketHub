@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block title %}Добавить отзыв - {{ shop.name }}{% endblock %}
+{% block content %}
+    <h1 class="mb-4">Добавить отзыв на {{ shop.name }}</h1>
+    <div class="card mb-4">
+        <div class="card-body">
+            <p><strong>Магазин:</strong> {{ shop.name }}</p>
+            <form method="post">
+                {% csrf_token %}
+                {% if form.errors %}
+                    <div class="alert alert-danger">
+                        <ul>
+                            {% for field in form %}
+                                {% for error in field.errors %}
+                                    <li>{{ field.label }}: {{ error }}</li>
+                                {% endfor %}
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
+                {{ form.as_p }}
+                <button type="submit" class="btn btn-primary">Отправить отзыв</button>
+                <a href="{% url 'shops:shop_detail' shop.pk %}" class="btn btn-secondary">Отмена</a>
+            </form>
+        </div>
+    </div>
+{% endblock %}

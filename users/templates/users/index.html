@@ -1,43 +1,13 @@
 {% extends 'base.html' %}
-{% block title %}Markethub{% endblock %}
+{% block title %}Добро пожаловать - Markethub{% endblock %}
 {% block content %}
-    <div class="container">
-        <h1 class="mb-4">Популярные товары</h1>
-        <form class="mb-3" method="get" action="{% url 'products:product_list' %}">
-            <div class="input-group">
-                <input class="form-control dotted-input w-full py-3 text-sm font-medium text-gray-900 placeholder-gray-500" type="search" name="q" placeholder="Поиск товаров" value="{{ query|default:'' }}">
-                <button class="btn btn-outline-success" type="submit">Поиск</button>
-            </div>
-        </form>
-        {% if products %}
-            <div class="row">
-                {% for product in products %}
-                    <div class="col-md-4 mb-3">
-                        <div class="card h-100">
-                            {% if product.main_image %}
-                                <img src="{{ product.main_image.url }}" class="card-img-top" alt="{{ product.name }}" style="height: 200px; object-fit: cover;">
-                            {% else %}
-                                <div class="card-img-top bg-light" style="height: 200px; display: flex; align-items: center; justify-content: center;">
-                                    <span>Нет изображения</span>
-                                </div>
-                            {% endif %}
-                            <div class="card-body">
-                                <h5 class="card-title">{{ product.name }}</h5>
-                                <p class="card-text">{{ product.description|truncatewords:20 }}</p>
-                                <p class="card-text"><strong>Цена:</strong> {{ product.price }} ₽</p>
-                                <p class="card-text"><strong>Магазин:</strong> <a href="{% url 'shops:shop_detail' pk=product.shop.pk %}">{{ product.shop.name }}</a></p>
-                                <p class="card-text"><strong>Рейтинг магазина:</strong> {{ product.shop.rating|floatformat:2 }}</p>
-                                <div class="d-flex justify-content-between">
-                                    <a href="{% url 'products:product_detail' pk=product.pk %}" class="btn btn-primary btn-sm">Подробнее</a>
-                                    <a href="#" class="btn btn-success btn-sm">Заказать</a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                {% endfor %}
-            </div>
-        {% else %}
-            <p>Товары не найдены.</p>
-        {% endif %}
-    </div>
+    <h1 class="mb-4">Добро пожаловать в Markethub!</h1>
+    <p>Исследуйте наши товары и магазины, чтобы найти лучшие предложения.</p>
+    <a href="{% url 'products:product_list' %}" class="btn btn-primary mb-3">Посмотреть товары</a>
+    {% if user.is_authenticated and user.cart.items.exists %}
+        <div class="alert alert-info">
+            В вашей корзине {{ user.cart.items.count }} товар(ов). 
+            <a href="{% url 'orders:cart_detail' %}" class="alert-link">Перейти в корзину</a>.
+        </div>
+    {% endif %}
 {% endblock %}

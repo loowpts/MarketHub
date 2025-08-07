@@ -1,6 +1,7 @@
 from django.db import models
 from shops.models import Shop
 from users.models import User
+from django.db.models import Avg
 
 class Category(models.Model):
     name = models.CharField(max_length=100, verbose_name='Название')
@@ -52,7 +53,9 @@ class Product(models.Model):
         return self.name
 
     def update_rating(self):
-        pass
+        avg_rating = self.reviews.aggregate(Avg('rating'))['rating__avg'] or 0.0
+        self.rating = round(avg_rating, 2)
+        self.save()
 
 class ProductImage(models.Model):
     product = models.ForeignKey(
