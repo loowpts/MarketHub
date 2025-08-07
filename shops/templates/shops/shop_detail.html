@@ -13,6 +13,7 @@
             <p><strong>Владелец:</strong> {{ shop.user.email }}</p>
             {% if shop.status == 'approved' and user == shop.user %}
                 <a href="{% url 'products:product_create' %}" class="btn btn-success">Добавить товар</a>
+                <a href="{% url 'shops:shop_edit' shop.pk %}" class="btn btn-secondary mt-2">Редактировать магазин</a>
             {% endif %}
             {% if user.is_authenticated %}
                 <a href="{% url 'reviews:shop_review_create' shop_id=shop.pk %}" class="btn btn-secondary mt-2">Оставить отзыв</a>
@@ -39,6 +40,10 @@
                                 <a href="{% url 'orders:cart_add' product.pk %}" class="btn btn-primary">Добавить в корзину</a>
                             {% else %}
                                 <p class="text-danger">Нет в наличии</p>
+                            {% endif %}
+                            {% if user == product.shop.user %}
+                                <a href="{% url 'products:product_edit' product.pk %}" class="btn btn-secondary mt-2">Редактировать</a>
+                                <a href="{% url 'products:product_delete' product.pk %}" class="btn btn-danger mt-2">Удалить</a>
                             {% endif %}
                         </div>
                     </div>

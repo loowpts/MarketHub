@@ -3,31 +3,48 @@
 {% block content %}
     <h1 class="mb-4">Товары</h1>
     <form method="get" class="mb-4">
-        <div class="input-group">
-            <input type="text" name="q" value="{{ query }}" class="form-control dotted-input" placeholder="Поиск товаров...">
-            <button type="submit" class="btn btn-primary">Найти</button>
+        <div class="row">
+            <div class="col-md-4">
+                <input type="text" name="q" class="dotted-input w-full py-3 text-sm font-medium text-gray-900 placeholder-gray-500" placeholder="Поиск товаров" value="{{ request.GET.q }}">
+            </div>
+            <div class="col-md-3">
+                <input type="number" name="price_min" class="dotted-input w-full py-3 text-sm font-medium text-gray-900 placeholder-gray-500" placeholder="Мин. цена" value="{{ request.GET.price_min }}">
+            </div>
+            <div class="col-md-3">
+                <input type="number" name="price_max" class="dotted-input w-full py-3 text-sm font-medium text-gray-900 placeholder-gray-500" placeholder="Макс. цена" value="{{ request.GET.price_max }}">
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-full">Найти</button>
+            </div>
         </div>
     </form>
-    <div class="row">
-        {% for product in products %}
-            <div class="col-md-4 mb-4">
-                <div class="card h-100">
-                    {% if product.main_image %}
-                        <img src="{{ product.main_image.url }}" class="card-img-top" alt="{{ product.name }}" style="height: 200px; object-fit: cover;">
-                    {% else %}
-                        <div class="card-img-top bg-secondary" style="height: 200px;"></div>
-                    {% endif %}
-                    <div class="card-body">
-                        <h5 class="card-title">{{ product.name }}</h5>
-                        <p class="card-text">Магазин: <a href="{% url 'shops:shop_detail' product.shop.pk %}">{{ product.shop.name }}</a></p>
-                        <p class="card-text">Цена: {{ product.price }} ₽</p>
-                        <p class="card-text">Рейтинг: {{ product.rating|floatformat:2 }}</p>
-                        <a href="{% url 'products:product_detail' product.pk %}" class="btn btn-primary">Заказать</a>
+    {% if products %}
+        <div class="row">
+            {% for product in products %}
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                <a href="{% url 'products:product_detail' product.pk %}">{{ product.name }}</a>
+                            </h5>
+                            {% if product.main_image %}
+                                <img src="{{ product.main_image.url }}" alt="{{ product.name }}" class="img-fluid mb-2" style="max-height: 150px;">
+                            {% endif %}
+                            <p><strong>Магазин:</strong> <a href="{% url 'shops:shop_detail' product.shop.pk %}">{{ product.shop.name }}</a></p>
+                            <p><strong>Цена:</strong> {{ product.price }} ₽</p>
+                            <p><strong>Рейтинг:</strong> {{ product.rating|floatformat:2 }}</p>
+                            <p><strong>В наличии:</strong> {{ product.stock }}</p>
+                            {% if product.stock > 0 %}
+                                <a href="{% url 'orders:cart_add' product.pk %}" class="btn btn-primary">Добавить в корзину</a>
+                            {% else %}
+                                <p class="text-danger">Нет в наличии</p>
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
-            </div>
-        {% empty %}
-            <p>Товаров пока нет.</p>
-        {% endfor %}
-    </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>Товаров пока нет.</p>
+    {% endif %}
 {% endblock %}

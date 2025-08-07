@@ -40,6 +40,23 @@ def shop_create(request):
         form = ShopForm()
     return render(request, 'shops/shop_form.html', {'form': form})
 
+
+@login_required
+def shop_edit(request, pk):
+    shop = get_object_or_404(Shop, pk=pk, user=request.user)
+    if request.method == 'POST':
+        form = ShopForm(request.POST, request.FILES, instance=shop)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Магазин обновлён.')
+            return redirect('shops:shop_detail', pk=shop.pk)
+        else:
+            messages.error(request, 'Исправьте ошибки в форме.')
+    else:
+        form = ShopForm(instance=shop)
+    return render(request, 'shops/shop_form.html', {'form': form, 'shop': shop})
+
+
 @login_required
 @user_passes_test(lambda u: u.profile.role == 'admin')
 def moderate_shop(request, pk):

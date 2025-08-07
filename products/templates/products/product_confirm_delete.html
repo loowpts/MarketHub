@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block title %}Удаление товара - Markethub{% endblock %}
+{% block content %}
+    <h1 class="mb-4">Удаление товара</h1>
+    <div class="card mb-4">
+        <div class="card-body">
+            <p>Вы уверены, что хотите удалить товар <strong>{{ product.name }}</strong>?</p>
+            <form method="post">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger">Удалить</button>
+                <a href="{% url 'shops:shop_detail' product.shop.pk %}" class="btn btn-secondary">Отмена</a>
+            </form>
+        </div>
+    </div>
+{% endblock %}
