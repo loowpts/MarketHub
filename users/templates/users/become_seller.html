@@ -1,15 +1,140 @@
 {% extends 'base.html' %}
+{% load static %}
+
 {% block title %}Стать продавцом - Markethub{% endblock %}
+
 {% block content %}
-    <h1 class="mb-4">Стать продавцом</h1>
-    <div class="card mb-4">
-        <div class="card-body">
-            <p>Хотите начать продавать свои товары? Подтвердите, чтобы стать продавцом.</p>
-            <form method="post">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-primary">Стать продавцом</button>
-                <a href="{% url 'users:profile' %}" class="btn btn-secondary">Отмена</a>
-            </form>
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-custom">
+                <div class="card-header text-center">
+                    <h4 class="mb-0">
+                        <i class="fas fa-store"></i> Стать продавцом на Markethub
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-handshake fa-3x text-primary mb-3"></i>
+                        <p class="lead">Присоединяйтесь к нашему сообществу продавцов и начните зарабатывать уже сегодня!</p>
+                    </div>
+
+                    <!-- Benefits -->
+                    <div class="row mb-4">
+                        <div class="col-md-4 text-center mb-3">
+                            <i class="fas fa-chart-line fa-2x text-success mb-2"></i>
+                            <h6>Увеличьте продажи</h6>
+                            <small class="text-muted">Доступ к миллионам покупателей</small>
+                        </div>
+                        <div class="col-md-4 text-center mb-3">
+                            <i class="fas fa-tools fa-2x text-info mb-2"></i>
+                            <h6>Удобные инструменты</h6>
+                            <small class="text-muted">Простое управление товарами</small>
+                        </div>
+                        <div class="col-md-4 text-center mb-3">
+                            <i class="fas fa-headset fa-2x text-warning mb-2"></i>
+                            <h6>Поддержка 24/7</h6>
+                            <small class="text-muted">Помощь на каждом этапе</small>
+                        </div>
+                    </div>
+
+                    <form method="post" class="needs-validation" novalidate>
+                        {% csrf_token %}
+                        
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i>
+                            <strong>Обратите внимание:</strong> После подтверждения статуса продавца вы сможете создавать магазины и добавлять товары.
+                        </div>
+
+                        <div class="form-check mb-4">
+                            <input class="form-check-input" 
+                                   type="checkbox" 
+                                   id="agree_terms" 
+                                   name="agree_terms"
+                                   required>
+                            <label class="form-check-label" for="agree_terms">
+                                Я согласен с <a href="#" class="text-primary">условиями продажи</a> 
+                                и <a href="#" class="text-primary">политикой конфиденциальности</a>
+                            </label>
+                            <div class="invalid-feedback">
+                                Необходимо согласиться с условиями
+                            </div>
+                        </div>
+
+                        <div class="form-check mb-4">
+                            <input class="form-check-input" 
+                                   type="checkbox" 
+                                   id="newsletter" 
+                                   name="newsletter">
+                            <label class="form-check-label" for="newsletter">
+                                Получать новости и советы для продавцов
+                            </label>
+                        </div>
+
+                        <div class="d-flex gap-2 justify-content-center">
+                            <a href="{% url 'users:profile' %}" 
+                               class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left"></i> Назад
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-check"></i> Стать продавцом
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- FAQ -->
+            <div class="card shadow-custom mt-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-question-circle"></i> Часто задаваемые вопросы
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="accordion" id="faqAccordion">
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="faq1">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse1">
+                                    Сколько стоит стать продавцом?
+                                </button>
+                            </h2>
+                            <div id="collapse1" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">
+                                    Регистрация в качестве продавца абсолютно бесплатна. Мы берем небольшую комиссию только с успешных продаж.
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="faq2">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse2">
+                                    Как быстро я смогу начать продавать?
+                                </button>
+                            </h2>
+                            <div id="collapse2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">
+                                    После подтверждения статуса продавца вы сможете создать магазин и добавить товары. Процесс модерации занимает до 24 часов.
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="faq3">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse3">
+                                    Какие товары можно продавать?
+                                </button>
+                            </h2>
+                            <div id="collapse3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                                <div class="accordion-body">
+                                    Вы можете продавать любые легальные товары, соответствующие нашим правилам. Запрещены товары для взрослых, оружие и наркотические вещества.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
+</div>
 {% endblock %}

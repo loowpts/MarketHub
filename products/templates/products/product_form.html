@@ -1,23 +1,193 @@
 {% extends 'base.html' %}
-{% block title %}Создать товар{% endblock %}
+{% load static %}
+
+{% block title %}
+    {% if form.instance.pk %}Редактировать товар{% else %}Добавить товар{% endif %} - Markethub
+{% endblock %}
+
 {% block content %}
-    <h1 class="mb-4">Создать товар</h1>
-    <form method="post" enctype="multipart/form-data">
-        {% csrf_token %}
-        <div class="card mb-4">
-            <div class="card-body">
-                <h5>Основные данные</h5>
-                {{ form.as_p }}
-                <h5 class="mt-4">Дополнительные изображения</h5>
-                {{ formset.management_form }}
-                {% for form in formset %}
-                    <div class="form-group mb-3">
-                        {{ form.image }}
-                    </div>
-                {% endfor %}
-                <button type="submit" class="btn btn-primary">Создать</button>
-                <a href="{% url 'users:profile' %}" class="btn btn-secondary">Отмена</a>
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-custom">
+                <div class="card-header">
+                    <h4 class="mb-0">
+                        <i class="fas fa-{% if form.instance.pk %}edit{% else %}plus{% endif %}"></i>
+                        {% if form.instance.pk %}Редактировать товар{% else %}Добавить товар{% endif %}
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+                        {% csrf_token %}
+                        
+                        <div class="form-group">
+                            <label for="{{ form.shop.id_for_label }}" class="form-label">
+                                <i class="fas fa-store"></i> Магазин *
+                            </label>
+                            <select class="form-select dotted-input" 
+                                    id="{{ form.shop.id_for_label }}"
+                                    name="{{ form.shop.name }}"
+                                    required>
+                                <option value="">Выберите магазин</option>
+                                {% for shop in form.shop.queryset %}
+                                    <option value="{{ shop.pk }}" 
+                                            {% if form.shop.value == shop.pk %}selected{% endif %}>
+                                        {{ shop.name }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                            {% if form.shop.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.shop.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="form-group">
+                            <label for="{{ form.name.id_for_label }}" class="form-label">
+                                <i class="fas fa-tag"></i> Название товара *
+                            </label>
+                            <input type="text" 
+                                   class="form-control dotted-input" 
+                                   id="{{ form.name.id_for_label }}"
+                                   name="{{ form.name.name }}"
+                                   value="{{ form.name.value|default:'' }}"
+                                   placeholder="Введите название товара"
+                                   required>
+                            {% if form.name.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.name.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="form-group">
+                            <label for="{{ form.category.id_for_label }}" class="form-label">
+                                <i class="fas fa-list"></i> Категория
+                            </label>
+                            <select class="form-select dotted-input" 
+                                    id="{{ form.category.id_for_label }}"
+                                    name="{{ form.category.name }}">
+                                <option value="">Выберите категорию</option>
+                                {% for category in form.category.queryset %}
+                                    <option value="{{ category.pk }}" 
+                                            {% if form.category.value == category.pk %}selected{% endif %}>
+                                        {{ category.name }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                            {% if form.category.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.category.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="form-group">
+                            <label for="{{ form.description.id_for_label }}" class="form-label">
+                                <i class="fas fa-align-left"></i> Описание
+                            </label>
+                            <textarea class="form-control dotted-input" 
+                                      id="{{ form.description.id_for_label }}"
+                                      name="{{ form.description.name }}"
+                                      rows="4"
+                                      placeholder="Введите описание товара">{{ form.description.value|default:'' }}</textarea>
+                            {% if form.description.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.description.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="{{ form.price.id_for_label }}" class="form-label">
+                                        <i class="fas fa-ruble-sign"></i> Цена *
+                                    </label>
+                                    <input type="number" 
+                                           class="form-control dotted-input" 
+                                           id="{{ form.price.id_for_label }}"
+                                           name="{{ form.price.name }}"
+                                           value="{{ form.price.value|default:'' }}"
+                                           placeholder="0.00"
+                                           step="0.01"
+                                           min="0"
+                                           required>
+                                    {% if form.price.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.price.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="{{ form.stock.id_for_label }}" class="form-label">
+                                        <i class="fas fa-boxes"></i> Количество *
+                                    </label>
+                                    <input type="number" 
+                                           class="form-control dotted-input" 
+                                           id="{{ form.stock.id_for_label }}"
+                                           name="{{ form.stock.name }}"
+                                           value="{{ form.stock.value|default:'' }}"
+                                           placeholder="0"
+                                           min="0"
+                                           required>
+                                    {% if form.stock.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.stock.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="{{ form.main_image.id_for_label }}" class="form-label">
+                                <i class="fas fa-image"></i> Основное изображение
+                            </label>
+                            <input type="file" 
+                                   class="form-control dotted-input" 
+                                   id="{{ form.main_image.id_for_label }}"
+                                   name="{{ form.main_image.name }}"
+                                   accept="image/*"
+                                   onchange="previewImage(this, 'main-image-preview')">
+                            {% if form.main_image.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.main_image.errors.0 }}
+                                </div>
+                            {% endif %}
+                            
+                            {% if form.instance.main_image %}
+                                <div class="mt-2">
+                                    <img src="{{ form.instance.main_image.url }}" 
+                                         alt="Текущее изображение" 
+                                         class="img-thumbnail"
+                                         style="max-width: 200px;">
+                                </div>
+                            {% endif %}
+                            
+                            <img id="main-image-preview" 
+                                 class="img-thumbnail mt-2" 
+                                 style="max-width: 200px; display: none;">
+                        </div>
+
+                        <div class="d-flex gap-2 justify-content-end">
+                            <a href="{% if form.instance.pk %}{% url 'products:product_detail' form.instance.pk %}{% else %}{% url 'products:product_list' %}{% endif %}" 
+                               class="btn btn-outline-secondary">
+                                <i class="fas fa-times"></i> Отмена
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> 
+                                {% if form.instance.pk %}Сохранить изменения{% else %}Создать товар{% endif %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
-        </form>
+        </div>
     </div>
+</div>
 {% endblock %}

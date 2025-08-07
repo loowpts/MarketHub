@@ -1,16 +1,140 @@
 {% extends 'base.html' %}
-{% block title %}Регистрация{% endblock %}
+{% load static %}
+
+{% block title %}Регистрация - Markethub{% endblock %}
+
 {% block content %}
-    <div class="container">
-        <h1 class="mb-4">Регистрация</h1>
-        <form method="post" class="w-50">
-            {% csrf_token %}
-            {{ form.as_p }}
-            {% if form.non_field_errors %}
-                <div class="text-danger">{{ form.non_field_errors }}</div>
-            {% endif %}
-            <button type="submit" class="btn btn-primary mt-3">Зарегистрироваться</button>
-        </form>
-        <p class="mt-3">Уже есть аккаунт? <a href="{% url 'users:login' %}">Войти</a></p>
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="card shadow-custom mt-5">
+                <div class="card-body p-5">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-user-plus fa-3x text-primary mb-3"></i>
+                        <h2 class="h4">Создать аккаунт</h2>
+                        <p class="text-muted">Присоединяйтесь к Markethub</p>
+                    </div>
+
+                    <form method="post" class="needs-validation" novalidate>
+                        {% csrf_token %}
+                        
+                        <div class="form-group">
+                            <label for="{{ form.email.id_for_label }}" class="form-label">
+                                <i class="fas fa-envelope"></i> Email
+                            </label>
+                            <input type="email" 
+                                   class="form-control dotted-input" 
+                                   id="{{ form.email.id_for_label }}"
+                                   name="{{ form.email.name }}"
+                                   value="{{ form.email.value|default:'' }}"
+                                   placeholder="Введите ваш email"
+                                   required>
+                            {% if form.email.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.email.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="form-group">
+                            <label for="{{ form.first_name.id_for_label }}" class="form-label">
+                                <i class="fas fa-user"></i> Имя
+                            </label>
+                            <input type="text" 
+                                   class="form-control dotted-input" 
+                                   id="{{ form.first_name.id_for_label }}"
+                                   name="{{ form.first_name.name }}"
+                                   value="{{ form.first_name.value|default:'' }}"
+                                   placeholder="Введите ваше имя"
+                                   required>
+                            {% if form.first_name.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.first_name.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="form-group">
+                            <label for="{{ form.last_name.id_for_label }}" class="form-label">
+                                <i class="fas fa-user"></i> Фамилия
+                            </label>
+                            <input type="text" 
+                                   class="form-control dotted-input" 
+                                   id="{{ form.last_name.id_for_label }}"
+                                   name="{{ form.last_name.name }}"
+                                   value="{{ form.last_name.value|default:'' }}"
+                                   placeholder="Введите вашу фамилию"
+                                   required>
+                            {% if form.last_name.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.last_name.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="form-group">
+                            <label for="{{ form.password1.id_for_label }}" class="form-label">
+                                <i class="fas fa-lock"></i> Пароль
+                            </label>
+                            <input type="password" 
+                                   class="form-control dotted-input" 
+                                   id="{{ form.password1.id_for_label }}"
+                                   name="{{ form.password1.name }}"
+                                   placeholder="Введите пароль"
+                                   required>
+                            {% if form.password1.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.password1.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="form-group">
+                            <label for="{{ form.password2.id_for_label }}" class="form-label">
+                                <i class="fas fa-lock"></i> Подтверждение пароля
+                            </label>
+                            <input type="password" 
+                                   class="form-control dotted-input" 
+                                   id="{{ form.password2.id_for_label }}"
+                                   name="{{ form.password2.name }}"
+                                   placeholder="Повторите пароль"
+                                   required>
+                            {% if form.password2.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.password2.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        {% if form.is_seller %}
+                            <div class="form-check mb-3">
+                                <input type="checkbox" 
+                                       class="form-check-input dotted-input" 
+                                       id="{{ form.is_seller.id_for_label }}"
+                                       name="{{ form.is_seller.name }}"
+                                       {% if form.is_seller.value %}checked{% endif %}>
+                                <label class="form-check-label" for="{{ form.is_seller.id_for_label }}">
+                                    <i class="fas fa-store"></i> Я хочу продавать товары
+                                </label>
+                            </div>
+                        {% endif %}
+
+                        <button type="submit" class="btn btn-primary w-100 mb-3">
+                            <i class="fas fa-user-plus"></i> Зарегистрироваться
+                        </button>
+
+                        <div class="text-center">
+                            <p class="text-muted">
+                                Уже есть аккаунт? 
+                                <a href="{% url 'users:login' %}" class="text-primary text-decoration-none">
+                                    Войти
+                                </a>
+                            </p>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
+</div>
 {% endblock %}

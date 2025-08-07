@@ -1,25 +1,233 @@
 {% extends 'base.html' %}
-{% block title %}Оформить заказ - Markethub{% endblock %}
+{% load static %}
+
+{% block title %}Оформление заказа - Markethub{% endblock %}
+
 {% block content %}
-    <h1 class="mb-4">Оформить заказ</h1>
-    {% if cart.items.exists %}
-        <div class="card mb-4">
-            <div class="card-body">
-                <h5>Содержимое корзины</h5>
-                <ul>
+<div class="container mt-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'users:index' %}">Главная</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'orders:cart_detail' %}">Корзина</a></li>
+            <li class="breadcrumb-item active">Оформление заказа</li>
+        </ol>
+    </nav>
+
+    <h2 class="h4 mb-4">
+        <i class="fas fa-credit-card"></i> Оформление заказа
+    </h2>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <form method="post" class="needs-validation" novalidate>
+                {% csrf_token %}
+                
+                <!-- Delivery Information -->
+                <div class="card shadow-custom mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-truck"></i> Информация о доставке
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="first_name" class="form-label">
+                                        <i class="fas fa-user"></i> Имя *
+                                    </label>
+                                    <input type="text" 
+                                           class="form-control dotted-input" 
+                                           id="first_name"
+                                           name="first_name"
+                                           value="{{ user.first_name }}"
+                                           required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="last_name" class="form-label">
+                                        <i class="fas fa-user"></i> Фамилия *
+                                    </label>
+                                    <input type="text" 
+                                           class="form-control dotted-input" 
+                                           id="last_name"
+                                           name="last_name"
+                                           value="{{ user.last_name }}"
+                                           required>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="email" class="form-label">
+                                <i class="fas fa-envelope"></i> Email *
+                            </label>
+                            <input type="email" 
+                                   class="form-control dotted-input" 
+                                   id="email"
+                                   name="email"
+                                   value="{{ user.email }}"
+                                   required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="phone" class="form-label">
+                                <i class="fas fa-phone"></i> Телефон *
+                            </label>
+                            <input type="tel" 
+                                   class="form-control dotted-input" 
+                                   id="phone"
+                                   name="phone"
+                                   placeholder="+7 (999) 123-45-67"
+                                   required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="address" class="form-label">
+                                <i class="fas fa-map-marker-alt"></i> Адрес доставки *
+                            </label>
+                            <textarea class="form-control dotted-input" 
+                                      id="address"
+                                      name="address"
+                                      rows="3"
+                                      placeholder="Укажите полный адрес доставки"
+                                      required></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Payment Method -->
+                <div class="card shadow-custom mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-credit-card"></i> Способ оплаты
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" 
+                                   type="radio" 
+                                   name="payment_method" 
+                                   id="payment_card" 
+                                   value="card" 
+                                   checked>
+                            <label class="form-check-label" for="payment_card">
+                                <i class="fas fa-credit-card text-primary"></i>
+                                Банковская карта
+                            </label>
+                        </div>
+                        
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" 
+                                   type="radio" 
+                                   name="payment_method" 
+                                   id="payment_cash" 
+                                   value="cash">
+                            <label class="form-check-label" for="payment_cash">
+                                <i class="fas fa-money-bill text-success"></i>
+                                Наличными при получении
+                            </label>
+                        </div>
+                        
+                        <div class="form-check">
+                            <input class="form-check-input" 
+                                   type="radio" 
+                                   name="payment_method" 
+                                   id="payment_transfer" 
+                                   value="transfer">
+                            <label class="form-check-label" for="payment_transfer">
+                                <i class="fas fa-university text-info"></i>
+                                Банковский перевод
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Additional Information -->
+                <div class="card shadow-custom mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-comment"></i> Дополнительная информация
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label for="comment" class="form-label">
+                                Комментарий к заказу
+                            </label>
+                            <textarea class="form-control dotted-input" 
+                                      id="comment"
+                                      name="comment"
+                                      rows="3"
+                                      placeholder="Укажите пожелания по доставке или другую важную информацию"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <a href="{% url 'orders:cart_detail' %}" 
+                       class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left"></i> Вернуться в корзину
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-check"></i> Оформить заказ
+                    </button>
+                </div>
+            </form>
+        </div>
+        
+        <div class="col-lg-4">
+            <!-- Order Summary -->
+            <div class="card shadow-custom">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-receipt"></i> Ваш заказ
+                    </h5>
+                </div>
+                <div class="card-body">
                     {% for item in cart.items.all %}
-                        <li>{{ item.product.name }} ({{ item.quantity }} шт.) - {{ item.product.price }} ₽</li>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <div class="flex-grow-1">
+                                <h6 class="mb-0">{{ item.product.name|truncatechars:25 }}</h6>
+                                <small class="text-muted">{{ item.quantity }} × {{ item.product.price }} ₽</small>
+                            </div>
+                            <strong>{{ item.get_total_price }} ₽</strong>
+                        </div>
                     {% endfor %}
-                </ul>
-                <form method="post">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-primary">Подтвердить заказ</button>
-                    <a href="{% url 'orders:cart_detail' %}" class="btn btn-secondary">Назад в корзину</a>
-                </form>
+                    
+                    <hr>
+                    
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Товары:</span>
+                        <span>{{ cart.get_total_price }} ₽</span>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Доставка:</span>
+                        <span class="text-success">Бесплатно</span>
+                    </div>
+                    
+                    <hr>
+                    
+                    <div class="d-flex justify-content-between">
+                        <strong>Итого:</strong>
+                        <strong class="text-primary">{{ cart.get_total_price }} ₽</strong>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Security Info -->
+            <div class="card shadow-custom mt-3">
+                <div class="card-body text-center">
+                    <i class="fas fa-shield-alt fa-2x text-success mb-2"></i>
+                    <h6>Безопасная оплата</h6>
+                    <small class="text-muted">
+                        Ваши данные защищены SSL-шифрованием
+                    </small>
+                </div>
             </div>
         </div>
-    {% else %}
-        <p>Ваша корзина пуста.</p>
-        <a href="{% url 'products:product_list' %}" class="btn btn-primary">Перейти к товарам</a>
-    {% endif %}
+    </div>
+</div>
 {% endblock %}

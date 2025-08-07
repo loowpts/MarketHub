@@ -5,10 +5,30 @@ from django.contrib import messages
 from django.contrib.auth.forms import AuthenticationForm
 from .forms import CustomUserCreationForm, UserProfileForm
 from products.models import Product
+from shops.models import Shop
+from django.db.models import Sum
+from .models import User
+
 
 def index_view(request):
-    products = Product.objects.filter(shop__status='approved').order_by('-created_at')[:12]
-    return render(request, 'users/index.html', {'products': products})
+    top_shops = Shop.objects.filter(status='approved').annotate(
+        total_orders=Sum('products__order_items__quantity')
+    ).order_by('-total_orders')[:6]
+
+    featured_shops = Shop.objects.filter(status='approved').order_by('-rating')[:6]
+
+    products_count = Product.objects.filter(shop__status='approved').count()
+    shops_count = Shop.objects.filter(status='approved').count()
+    users_count = User.objects.filter(is_active=True).count()
+
+    context = {
+        'top_shops': top_shops,
+        'featured_shops': featured_shops,
+        'products_count': products_count,
+        'shops_count': shops_count,
+        'users_count': users_count,
+    }
+    return render(request, 'users/index.html', context)
 
 def register_view(request):
     if request.method == 'POST':

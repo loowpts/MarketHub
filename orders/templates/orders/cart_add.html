@@ -1,30 +1,47 @@
 {% extends 'base.html' %}
-{% block title %}Добавить в корзину - {{ product.name }}{% endblock %}
+{% load static %}
+
+{% block title %}Товар добавлен в корзину - Markethub{% endblock %}
+
 {% block content %}
-    <h1 class="mb-4">Добавить {{ product.name }} в корзину</h1>
-    <div class="card mb-4">
-        <div class="card-body">
-            <p><strong>Товар:</strong> {{ product.name }}</p>
-            <p><strong>Магазин:</strong> <a href="{% url 'shops:shop_detail' product.shop.pk %}">{{ product.shop.name }}</a></p>
-            <p><strong>Цена:</strong> {{ product.price }} ₽</p>
-            <p><strong>В наличии:</strong> {{ product.stock }}</p>
-            <form method="post">
-                {% csrf_token %}
-                {% if form.errors %}
-                    <div class="alert alert-danger">
-                        <ul>
-                            {% for field in form %}
-                                {% for error in field.errors %}
-                                    <li>{{ field.label }}: {{ error }}</li>
-                                {% endfor %}
-                            {% endfor %}
-                        </ul>
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-custom border-success">
+                <div class="card-header bg-success text-white text-center">
+                    <h4 class="mb-0">
+                        <i class="fas fa-check-circle"></i> Товар добавлен в корзину!
+                    </h4>
+                </div>
+                <div class="card-body text-center">
+                    {% if product.main_image %}
+                        <img src="{{ product.main_image.url }}" 
+                             alt="{{ product.name }}" 
+                             class="img-thumbnail mb-3"
+                             style="max-width: 200px;">
+                    {% endif %}
+                    
+                    <h5>{{ product.name }}</h5>
+                    <p class="text-muted">{{ product.price }} ₽</p>
+                    
+                    <div class="alert alert-success">
+                        <i class="fas fa-info-circle"></i>
+                        Товар успешно добавлен в вашу корзину
                     </div>
-                {% endif %}
-                {{ form.as_p }}
-                <button type="submit" class="btn btn-primary">Добавить в корзину</button>
-                <a href="{% url 'products:product_detail' product.pk %}" class="btn btn-secondary">Отмена</a>
-            </form>
+                    
+                    <div class="d-flex gap-2 justify-content-center">
+                        <a href="{% url 'orders:cart_detail' %}" 
+                           class="btn btn-primary">
+                            <i class="fas fa-shopping-cart"></i> Перейти в корзину
+                        </a>
+                        <a href="{% url 'products:product_list' %}" 
+                           class="btn btn-outline-primary">
+                            <i class="fas fa-arrow-left"></i> Продолжить покупки
+                        </a>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
+</div>
 {% endblock %}

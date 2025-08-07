@@ -1,72 +1,227 @@
 {% extends 'base.html' %}
+{% load static %}
+
 {% block title %}{{ shop.name }} - Markethub{% endblock %}
+
 {% block content %}
-    <h1 class="mb-4">{{ shop.name }}</h1>
-    <div class="card mb-4">
+<div class="container mt-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'users:index' %}">Главная</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'shops:shop_list' %}">Магазины</a></li>
+            <li class="breadcrumb-item active">{{ shop.name }}</li>
+        </ol>
+    </nav>
+
+    <!-- Shop Header -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="text-center">
+                {% if shop.logo %}
+                    <img src="{{ shop.logo.url }}" 
+                         alt="{{ shop.name }}" 
+                         class="img-fluid rounded-custom shadow-custom"
+                         style="max-width: 300px; max-height: 200px; object-fit: cover;">
+                {% else %}
+                    <img src="/placeholder.svg?height=200&width=300" 
+                         alt="{{ shop.name }}" 
+                         class="img-fluid rounded-custom shadow-custom">
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="col-md-8">
+            <div class="d-flex justify-content-between align-items-start mb-3">
+                <h1 class="h3">{{ shop.name }}</h1>
+                <span class="badge bg-{% if shop.status == 'approved' %}success{% elif shop.status == 'pending' %}warning{% else %}danger{% endif %} fs-6">
+                    {% if shop.status == 'approved' %}
+                        <i class="fas fa-check"></i> Одобрен
+                    {% elif shop.status == 'pending' %}
+                        <i class="fas fa-clock"></i> На модерации
+                    {% else %}
+                        <i class="fas fa-times"></i> Отклонен
+                    {% endif %}
+                </span>
+            </div>
+            
+            <div class="rating mb-3" data-rating="{{ shop.rating }}">
+                {% for i in "12345" %}
+                    <i class="star far fa-star"></i>
+                {% endfor %}
+                <span class="rating-text">({{ shop.reviews.count }} отзывов)</span>
+            </div>
+            
+            <p class="text-muted mb-3">{{ shop.description|linebreaks }}</p>
+            
+            <div class="row text-center mb-3">
+                <div class="col-4">
+                    <div class="border-end">
+                        <h5 class="text-primary mb-0">{{ shop.products.count }}</h5>
+                        <small class="text-muted">Товаров</small>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="border-end">
+                        <h5 class="text-primary mb-0">{{ shop.reviews.count }}</h5>
+                        <small class="text-muted">Отзывов</small>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <h5 class="text-primary mb-0">{{ shop.rating|floatformat:1 }}</h5>
+                    <small class="text-muted">Рейтинг</small>
+                </div>
+            </div>
+            
+            <div class="d-flex gap-2 flex-wrap">
+                {% if user.is_authenticated %}
+                    <a href="{% url 'reviews:shop_review_create' shop.pk %}" 
+                       class="btn btn-outline-primary">
+                        <i class="fas fa-star"></i> Оставить отзыв
+                    </a>
+                {% endif %}
+                
+                {% if user == shop.user %}
+                    <a href="{% url 'shops:shop_edit' shop.pk %}" 
+                       class="btn btn-warning">
+                        <i class="fas fa-edit"></i> Редактировать
+                    </a>
+                    <a href="{% url 'products:product_create' %}?shop={{ shop.pk }}" 
+                       class="btn btn-success">
+                        <i class="fas fa-plus"></i> Добавить товар
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Shop Products -->
+    <div class="card shadow-custom mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">
+                <i class="fas fa-box"></i> Товары магазина ({{ shop.products.count }})
+            </h5>
+        </div>
         <div class="card-body">
-            {% if shop.logo %}
-                <img src="{{ shop.logo.url }}" alt="{{ shop.name }}" style="max-height: 200px; object-fit: cover;" class="mb-3">
-            {% endif %}
-            <p><strong>Статус:</strong> {{ shop.get_status_display }}</p>
-            <p><strong>Рейтинг:</strong> {{ shop.rating|floatformat:2 }}</p>
-            <p><strong>Описание:</strong> {{ shop.description|default:"Без описания" }}</p>
-            <p><strong>Владелец:</strong> {{ shop.user.email }}</p>
-            {% if shop.status == 'approved' and user == shop.user %}
-                <a href="{% url 'products:product_create' %}" class="btn btn-success">Добавить товар</a>
-                <a href="{% url 'shops:shop_edit' shop.pk %}" class="btn btn-secondary mt-2">Редактировать магазин</a>
-            {% endif %}
-            {% if user.is_authenticated %}
-                <a href="{% url 'reviews:shop_review_create' shop_id=shop.pk %}" class="btn btn-secondary mt-2">Оставить отзыв</a>
+            {% if shop.products.exists %}
+                <div class="row">
+                    {% for product in shop.products.all %}
+                        <div class="col-md-6 col-lg-4 col-xl-3 mb-4">
+                            <div class="product-card h-100">
+                                <a href="{% url 'products:product_detail' product.pk %}" class="text-decoration-none">
+                                    {% if product.main_image %}
+                                        <img src="{{ product.main_image.url }}" 
+                                             alt="{{ product.name }}" 
+                                             class="product-image">
+                                    {% else %}
+                                        <img src="/placeholder.svg?height=200&width=300" 
+                                             alt="{{ product.name }}" 
+                                             class="product-image">
+                                    {% endif %}
+                                </a>
+                                
+                                <div class="card-body d-flex flex-column">
+                                    <h6 class="product-title">
+                                        <a href="{% url 'products:product_detail' product.pk %}" 
+                                           class="text-decoration-none text-dark">
+                                            {{ product.name }}
+                                        </a>
+                                    </h6>
+                                    
+                                    <p class="product-category">
+                                        <i class="fas fa-tag"></i> {{ product.category.name|default:"Без категории" }}
+                                    </p>
+                                    
+                                    <div class="rating" data-rating="{{ product.rating }}">
+                                        {% for i in "12345" %}
+                                            <i class="star far fa-star"></i>
+                                        {% endfor %}
+                                        <span class="rating-text">({{ product.reviews.count }})</span>
+                                    </div>
+                                    
+                                    <div class="product-price">{{ product.price }} ₽</div>
+                                    
+                                    <div class="mt-auto d-flex gap-2">
+                                        <a href="{% url 'products:product_detail' product.pk %}" 
+                                           class="btn btn-outline-primary btn-sm flex-fill">
+                                            <i class="fas fa-eye"></i> Подробнее
+                                        </a>
+                                        
+                                        {% if user.is_authenticated and product.stock > 0 %}
+                                            <button class="btn btn-primary btn-sm add-to-cart" 
+                                                    data-product-id="{{ product.pk }}"
+                                                    data-product-name="{{ product.name }}">
+                                                <i class="fas fa-cart-plus"></i>
+                                            </button>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-4">
+                    <i class="fas fa-box-open fa-3x text-muted mb-3"></i>
+                    <p class="text-muted">В этом магазине пока нет товаров</p>
+                    {% if user == shop.user %}
+                        <a href="{% url 'products:product_create' %}?shop={{ shop.pk }}" 
+                           class="btn btn-primary">
+                            <i class="fas fa-plus"></i> Добавить первый товар
+                        </a>
+                    {% endif %}
+                </div>
             {% endif %}
         </div>
     </div>
-    <h2 class="mb-4">Товары магазина</h2>
-    {% if shop.products.exists %}
-        <div class="row">
-            {% for product in shop.products.all %}
-                <div class="col-md-4 mb-4">
-                    <div class="card h-100">
-                        <div class="card-body">
-                            <h5 class="card-title">
-                                <a href="{% url 'products:product_detail' product.pk %}">{{ product.name }}</a>
-                            </h5>
-                            {% if product.main_image %}
-                                <img src="{{ product.main_image.url }}" alt="{{ product.name }}" class="img-fluid mb-2" style="max-height: 150px;">
-                            {% endif %}
-                            <p><strong>Цена:</strong> {{ product.price }} ₽</p>
-                            <p><strong>Рейтинг:</strong> {{ product.rating|floatformat:2 }}</p>
-                            <p><strong>В наличии:</strong> {{ product.stock }}</p>
-                            {% if product.stock > 0 %}
-                                <a href="{% url 'orders:cart_add' product.pk %}" class="btn btn-primary">Добавить в корзину</a>
-                            {% else %}
-                                <p class="text-danger">Нет в наличии</p>
-                            {% endif %}
-                            {% if user == product.shop.user %}
-                                <a href="{% url 'products:product_edit' product.pk %}" class="btn btn-secondary mt-2">Редактировать</a>
-                                <a href="{% url 'products:product_delete' product.pk %}" class="btn btn-danger mt-2">Удалить</a>
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
-            {% endfor %}
+
+    <!-- Shop Reviews -->
+    <div class="card shadow-custom">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">
+                <i class="fas fa-comments"></i> Отзывы о магазине ({{ shop.reviews.count }})
+            </h5>
+            {% if user.is_authenticated and user != shop.user %}
+                <a href="{% url 'reviews:shop_review_create' shop.pk %}" 
+                   class="btn btn-primary btn-sm">
+                    <i class="fas fa-plus"></i> Добавить отзыв
+                </a>
+            {% endif %}
         </div>
-    {% else %}
-        <p>В магазине пока нет товаров.</p>
-    {% endif %}
-    <h2 class="mb-4">Отзывы о магазине</h2>
-    {% if shop.reviews.exists %}
-        {% for review in shop.reviews.all %}
-            <div class="card mb-3">
-                <div class="card-body">
-                    <p><strong>{{ review.user.email }}</strong> ({{ review.rating }}/5)</p>
-                    <p>{{ review.comment|default:"Без комментария" }}</p>
-                    <p><small class="text-muted">Опубликовано: {{ review.created_at }}</small></p>
+        <div class="card-body">
+            {% if shop.reviews.exists %}
+                {% for review in shop.reviews.all %}
+                    <div class="review-card">
+                        <div class="review-header">
+                            <div>
+                                <strong class="review-author">
+                                    {{ review.user.first_name }} {{ review.user.last_name }}
+                                </strong>
+                                <div class="rating d-inline-block ms-2" data-rating="{{ review.rating }}">
+                                    {% for i in "12345" %}
+                                        <i class="star far fa-star"></i>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <small class="review-date">{{ review.created_at|date:"d.m.Y H:i" }}</small>
+                        </div>
+                        {% if review.comment %}
+                            <p class="review-comment">{{ review.comment }}</p>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="text-center py-4">
+                    <i class="fas fa-comment-slash fa-2x text-muted mb-3"></i>
+                    <p class="text-muted">Пока нет отзывов о этом магазине</p>
+                    {% if user.is_authenticated and user != shop.user %}
+                        <a href="{% url 'reviews:shop_review_create' shop.pk %}" 
+                           class="btn btn-primary">
+                            <i class="fas fa-star"></i> Оставить первый отзыв
+                        </a>
+                    {% endif %}
                 </div>
-            </div>
-        {% empty %}
-            <p>Отзывов пока нет.</p>
-        {% endfor %}
-    {% else %}
-        <p>Отзывов пока нет.</p>
-    {% endif %}
+            {% endif %}
+        </div>
+    </div>
+</div>
 {% endblock %}

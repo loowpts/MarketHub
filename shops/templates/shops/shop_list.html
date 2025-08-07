@@ -1,32 +1,107 @@
 {% extends 'base.html' %}
+{% load static %}
+
 {% block title %}Магазины - Markethub{% endblock %}
+
 {% block content %}
-    <h1 class="mb-4">Магазины</h1>
-    <form method="get" class="mb-4">
-        <div class="input-group">
-            <input type="text" name="q" value="{{ query }}" class="form-control dotted-input" placeholder="Поиск магазинов...">
-            <button type="submit" class="btn btn-primary">Найти</button>
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="h4 mb-0">Магазины</h2>
+            <small class="text-muted">Найдено: {{ shops.count }} магазинов</small>
         </div>
-    </form>
-    <div class="row">
-        {% for shop in shops %}
-            <div class="col-md-4 mb-4">
-                <div class="card h-100">
-                    {% if shop.logo %}
-                        <img src="{{ shop.logo.url }}" class="card-img-top" alt="{{ shop.name }}" style="height: 150px; object-fit: cover;">
-                    {% else %}
-                        <div class="card-img-top bg-secondary" style="height: 150px;"></div>
-                    {% endif %}
-                    <div class="card-body">
-                        <h5 class="card-title">{{ shop.name }}</h5>
-                        <p class="card-text">{{ shop.description|truncatewords:20 }}</p>
-                        <p class="card-text">Рейтинг: {{ shop.rating|floatformat:2 }}</p>
-                        <a href="{% url 'shops:shop_detail' shop.pk %}" class="btn btn-primary">Посмотреть</a>
+        
+        {% if user.is_authenticated %}
+            <a href="{% url 'shops:shop_create' %}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Создать магазин
+            </a>
+        {% endif %}
+    </div>
+
+    {% if shops %}
+        <div class="row">
+            {% for shop in shops %}
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="shop-card h-100">
+                        <a href="{% url 'shops:shop_detail' shop.pk %}" class="text-decoration-none">
+                            {% if shop.logo %}
+                                <img src="{{ shop.logo.url }}" 
+                                     alt="{{ shop.name }}" 
+                                     class="shop-logo">
+                            {% else %}
+                                <img src="/placeholder.svg?height=150&width=300" 
+                                     alt="{{ shop.name }}" 
+                                     class="shop-logo">
+                            {% endif %}
+                        </a>
+                        
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="shop-title">
+                                <a href="{% url 'shops:shop_detail' shop.pk %}" 
+                                   class="text-decoration-none text-dark">
+                                    {{ shop.name }}
+                                </a>
+                            </h5>
+                            
+                            <p class="shop-description flex-grow-1">
+                                {{ shop.description|truncatewords:20 }}
+                            </p>
+                            
+                            <div class="rating" data-rating="{{ shop.rating }}">
+                                {% for i in "12345" %}
+                                    <i class="star far fa-star"></i>
+                                {% endfor %}
+                                <span class="rating-text">({{ shop.reviews.count }})</span>
+                            </div>
+                            
+                            <div class="d-flex justify-content-between align-items-center mt-3">
+                                <small class="text-muted">
+                                    <i class="fas fa-box"></i> {{ shop.products.count }} товаров
+                                </small>
+                                
+                                <div class="d-flex gap-1">
+                                    <a href="{% url 'shops:shop_detail' shop.pk %}" 
+                                       class="btn btn-primary btn-sm">
+                                        <i class="fas fa-store"></i> Перейти
+                                    </a>
+                                    
+                                    {% if user == shop.user %}
+                                        <a href="{% url 'shops:shop_edit' shop.pk %}" 
+                                           class="btn btn-outline-warning btn-sm">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="mt-2">
+                                <span class="badge bg-{% if shop.status == 'approved' %}success{% elif shop.status == 'pending' %}warning{% else %}danger{% endif %}">
+                                    {% if shop.status == 'approved' %}
+                                        <i class="fas fa-check"></i> Одобрен
+                                    {% elif shop.status == 'pending' %}
+                                        <i class="fas fa-clock"></i> На модерации
+                                    {% else %}
+                                        <i class="fas fa-times"></i> Отклонен
+                                    {% endif %}
+                                </span>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
-        {% empty %}
-            <p>Магазинов пока нет.</p>
-        {% endfor %}
-    </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="text-center py-5">
+            <i class="fas fa-store-slash fa-3x text-muted mb-3"></i>
+            <h4>Магазины не найдены</h4>
+            <p class="text-muted">Пока нет зарегистрированных магазинов</p>
+            
+            {% if user.is_authenticated %}
+                <a href="{% url 'shops:shop_create' %}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Создать первый магазин
+                </a>
+            {% endif %}
+        </div>
+    {% endif %}
+</div>
 {% endblock %}

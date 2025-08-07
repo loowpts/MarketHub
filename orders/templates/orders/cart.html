@@ -1,28 +1,181 @@
 {% extends 'base.html' %}
+{% load static %}
+
 {% block title %}Корзина - Markethub{% endblock %}
+
 {% block content %}
-    <h1 class="mb-4">Корзина</h1>
-    {% if items %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="h4 mb-0">
+            <i class="fas fa-shopping-cart"></i> Корзина
+        </h2>
+        {% if cart.items.exists %}
+            <span class="badge bg-primary fs-6">{{ cart.items.count }} товаров</span>
+        {% endif %}
+    </div>
+
+    {% if cart.items.exists %}
         <div class="row">
-            {% for item in items %}
-                <div class="col-md-6 mb-4">
-                    <div class="card h-100">
-                        <div class="card-body">
-                            <h5 class="card-title">{{ item.product.name }}</h5>
-                            <p><strong>Магазин:</strong> <a href="{% url 'shops:shop_detail' item.product.shop.pk %}">{{ item.product.shop.name }}</a></p>
-                            <p><strong>Цена за единицу:</strong> {{ item.product.price }} ₽</p>
-                            <p><strong>Количество:</strong> {{ item.quantity }}</p>
-                            <p><strong>Итого:</strong> {{ item.total|floatformat:2 }} ₽</p> {# Изменено: используем item.total #}
-                        </div>
+            <div class="col-lg-8">
+                <div class="card shadow-custom">
+                    <div class="card-body">
+                        {% for item in cart.items.all %}
+                            <div class="cart-item">
+                                <div class="row align-items-center">
+                                    <div class="col-md-2">
+                                        <a href="{% url 'products:product_detail' item.product.pk %}">
+                                            {% if item.product.main_image %}
+                                                <img src="{{ item.product.main_image.url }}" 
+                                                     alt="{{ item.product.name }}" 
+                                                     class="cart-item-image">
+                                            {% else %}
+                                                <img src="/placeholder.svg?height=80&width=80" 
+                                                     alt="{{ item.product.name }}" 
+                                                     class="cart-item-image">
+                                            {% endif %}
+                                        </a>
+                                    </div>
+                                    
+                                    <div class="col-md-4">
+                                        <h6 class="mb-1">
+                                            <a href="{% url 'products:product_detail' item.product.pk %}" 
+                                               class="text-decoration-none text-dark">
+                                                {{ item.product.name }}
+                                            </a>
+                                        </h6>
+                                        <small class="text-muted">
+                                            <i class="fas fa-store"></i> {{ item.product.shop.name }}
+                                        </small>
+                                        <br>
+                                        <small class="text-muted">{{ item.product.price }} ₽ за шт.</small>
+                                    </div>
+                                    
+                                    <div class="col-md-3">
+                                        <div class="quantity-controls">
+                                            <button class="quantity-btn" 
+                                                    data-action="decrease"
+                                                    data-product-id="{{ item.product.pk }}">
+                                                <i class="fas fa-minus"></i>
+                                            </button>
+                                            <input type="number" 
+                                                   class="quantity-input" 
+                                                   value="{{ item.quantity }}"
+                                                   min="1"
+                                                   max="{{ item.product.stock }}"
+                                                   data-product-id="{{ item.product.pk }}">
+                                            <button class="quantity-btn" 
+                                                    data-action="increase"
+                                                    data-product-id="{{ item.product.pk }}">
+                                                <i class="fas fa-plus"></i>
+                                            </button>
+                                        </div>
+                                        <small class="text-muted d-block mt-1">
+                                            Доступно: {{ item.product.stock }} шт.
+                                        </small>
+                                    </div>
+                                    
+                                    <div class="col-md-2 text-end">
+                                        <strong data-item-total="{{ item.product.pk }}">
+                                            {{ item.get_total_price }} ₽
+                                        </strong>
+                                    </div>
+                                    
+                                    <div class="col-md-1 text-end">
+                                        <button class="btn btn-outline-danger btn-sm remove-from-cart" 
+                                                data-product-id="{{ item.product.pk }}"
+                                                title="Удалить из корзины">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
                     </div>
                 </div>
-            {% endfor %}
+            </div>
+            
+            <div class="col-lg-4">
+                <div class="card shadow-custom">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-calculator"></i> Итого
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Товары ({{ cart.items.count }} шт.):</span>
+                            <span class="cart-total">{{ cart.get_total_price }} ₽</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Доставка:</span>
+                            <span class="text-success">Бесплатно</span>
+                        </div>
+                        <hr>
+                        <div class="d-flex justify-content-between mb-3">
+                            <strong>К оплате:</strong>
+                            <strong class="text-primary cart-total">{{ cart.get_total_price }} ₽</strong>
+                        </div>
+                        
+                        <a href="{% url 'orders:order_create' %}" 
+                           class="btn btn-primary w-100 mb-2">
+                            <i class="fas fa-credit-card"></i> Оформить заказ
+                        </a>
+                        
+                        <a href="{% url 'products:product_list' %}" 
+                           class="btn btn-outline-primary w-100">
+                            <i class="fas fa-arrow-left"></i> Продолжить покупки
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Recommended Products -->
+                {% if recommended_products %}
+                    <div class="card shadow-custom mt-3">
+                        <div class="card-header">
+                            <h6 class="mb-0">
+                                <i class="fas fa-thumbs-up"></i> Рекомендуем также
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            {% for product in recommended_products|slice:":3" %}
+                                <div class="d-flex align-items-center mb-3">
+                                    <a href="{% url 'products:product_detail' product.pk %}" class="me-2">
+                                        {% if product.main_image %}
+                                            <img src="{{ product.main_image.url }}" 
+                                                 alt="{{ product.name }}" 
+                                                 style="width: 50px; height: 50px; object-fit: cover;"
+                                                 class="rounded">
+                                        {% else %}
+                                            <img src="/placeholder.svg?height=50&width=50" 
+                                                 alt="{{ product.name }}" 
+                                                 class="rounded">
+                                        {% endif %}
+                                    </a>
+                                    <div class="flex-grow-1">
+                                        <h6 class="mb-0">
+                                            <a href="{% url 'products:product_detail' product.pk %}" 
+                                               class="text-decoration-none text-dark">
+                                                {{ product.name|truncatechars:30 }}
+                                            </a>
+                                        </h6>
+                                        <small class="text-primary">{{ product.price }} ₽</small>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
         </div>
-        <h4>Общая сумма: {{ total_price|floatformat:2 }} ₽</h4>
-        <a href="{% url 'orders:order_create' %}" class="btn btn-primary">Оформить заказ</a>
-        <a href="{% url 'orders:cart_clear' %}" class="btn btn-danger">Очистить корзину</a>
     {% else %}
-        <p>Ваша корзина пуста.</p>
-        <a href="{% url 'products:product_list' %}" class="btn btn-primary">Перейти к товарам</a>
+        <div class="text-center py-5">
+            <i class="fas fa-shopping-cart fa-3x text-muted mb-3"></i>
+            <h4>Корзина пуста</h4>
+            <p class="text-muted">Добавьте товары в корзину, чтобы оформить заказ</p>
+            <a href="{% url 'products:product_list' %}" class="btn btn-primary">
+                <i class="fas fa-shopping-bag"></i> Перейти к покупкам
+            </a>
+        </div>
     {% endif %}
+</div>
 {% endblock %}

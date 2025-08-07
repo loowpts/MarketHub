@@ -1,51 +1,217 @@
 {% extends 'base.html' %}
+{% load static %}
+
 {% block title %}{{ product.name }} - Markethub{% endblock %}
+
 {% block content %}
-    <h1 class="mb-4">{{ product.name }}</h1>
-    <div class="card mb-4">
-        <div class="card-body">
-            {% if product.main_image %}
-                <img src="{{ product.main_image.url }}" alt="{{ product.name }}" style="max-height: 300px; object-fit: cover;" class="mb-3">
-            {% endif %}
-            <p><strong>Магазин:</strong> <a href="{% url 'shops:shop_detail' product.shop.pk %}">{{ product.shop.name }}</a></p>
-            <p><strong>Цена:</strong> {{ product.price }} ₽</p>
-            <p><strong>Рейтинг:</strong> {{ product.rating|floatformat:2 }}</p>
-            <p><strong>Описание:</strong> {{ product.description }}</p>
-            <p><strong>Количество на складе:</strong> {{ product.stock }}</p>
-            {% if product.images.exists %}
-                <h5>Дополнительные изображения</h5>
-                <div class="row">
+<div class="container mt-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'users:index' %}">Главная</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'products:product_list' %}">Товары</a></li>
+            <li class="breadcrumb-item active">{{ product.name }}</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <div class="col-md-6">
+            <!-- Product Images -->
+            <div id="productCarousel" class="carousel slide product-carousel" data-bs-ride="carousel">
+                <div class="carousel-inner">
+                    <div class="carousel-item active">
+                        {% if product.main_image %}
+                            <img src="{{ product.main_image.url }}" 
+                                 alt="{{ product.name }}" 
+                                 class="d-block w-100">
+                        {% else %}
+                            <img src="/placeholder.svg?height=400&width=600" 
+                                 alt="{{ product.name }}" 
+                                 class="d-block w-100">
+                        {% endif %}
+                    </div>
+                    
                     {% for image in product.images.all %}
-                        <div class="col-md-3 mb-3">
-                            <img src="{{ image.image.url }}" alt="{{ product.name }}" class="img-fluid" style="max-height: 100px;">
+                        <div class="carousel-item">
+                            <img src="{{ image.image.url }}" 
+                                 alt="{{ product.name }}" 
+                                 class="d-block w-100">
                         </div>
                     {% endfor %}
                 </div>
-            {% endif %}
-            {% if product.stock > 0 %}
-                <a href="{% url 'orders:cart_add' product.pk %}" class="btn btn-primary">Добавить в корзину</a>
-            {% else %}
-                <p class="text-danger">Товара нет в наличии</p>
-            {% endif %}
-            {% if user.is_authenticated %}
-                <a href="{% url 'reviews:review_create' product.pk %}" class="btn btn-secondary mt-2">Оставить отзыв</a>
-            {% endif %}
+                
+                {% if product.images.exists %}
+                    <button class="carousel-control-prev" type="button" data-bs-target="#productCarousel" data-bs-slide="prev">
+                        <span class="carousel-control-prev-icon"></span>
+                    </button>
+                    <button class="carousel-control-next" type="button" data-bs-target="#productCarousel" data-bs-slide="next">
+                        <span class="carousel-control-next-icon"></span>
+                    </button>
+                    
+                    <div class="carousel-indicators">
+                        <button type="button" data-bs-target="#productCarousel" data-bs-slide-to="0" class="active"></button>
+                        {% for image in product.images.all %}
+                            <button type="button" data-bs-target="#productCarousel" data-bs-slide-to="{{ forloop.counter }}"></button>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="product-info">
+                <h1 class="h3 mb-3">{{ product.name }}</h1>
+                
+                <div class="mb-3">
+                    <span class="badge bg-light text-dark">
+                        <i class="fas fa-tag"></i> {{ product.category.name|default:"Без категории" }}
+                    </span>
+                </div>
+                
+                <div class="rating mb-3" data-rating="{{ product.rating }}">
+                    {% for i in "12345" %}
+                        <i class="star far fa-star"></i>
+                    {% endfor %}
+                    <span class="rating-text">({{ product.reviews.count }} отзывов)</span>
+                </div>
+                
+                <div class="product-price h2 text-primary mb-3">{{ product.price }} ₽</div>
+                
+                <div class="mb-3">
+                    <small class="text-muted">
+                        <i class="fas fa-store"></i> Продавец: 
+                        <a href="{% url 'shops:shop_detail' product.shop.pk %}" class="text-decoration-none">
+                            {{ product.shop.name }}
+                        </a>
+                    </small>
+                </div>
+                
+                <div class="mb-3">
+                    {% if product.stock > 0 %}
+                        <span class="badge bg-success">
+                            <i class="fas fa-check"></i> В наличии ({{ product.stock }} шт.)
+                        </span>
+                    {% else %}
+                        <span class="badge bg-danger">
+                            <i class="fas fa-times"></i> Нет в наличии
+                        </span>
+                    {% endif %}
+                </div>
+                
+                {% if user.is_authenticated %}
+                    <div class="d-flex gap-2 mb-4">
+                        {% if product.stock > 0 %}
+                            <button class="btn btn-primary btn-lg add-to-cart" 
+                                    data-product-id="{{ product.pk }}"
+                                    data-product-name="{{ product.name }}">
+                                <i class="fas fa-cart-plus"></i> Добавить в корзину
+                            </button>
+                        {% endif %}
+                        
+                        <a href="{% url 'reviews:review_create' product.pk %}" 
+                           class="btn btn-outline-primary">
+                            <i class="fas fa-star"></i> Оставить отзыв
+                        </a>
+                    </div>
+                {% else %}
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i>
+                        <a href="{% url 'users:login' %}" class="alert-link">Войдите</a> 
+                        или <a href="{% url 'users:register' %}" class="alert-link">зарегистрируйтесь</a>, 
+                        чтобы добавить товар в корзину
+                    </div>
+                {% endif %}
+                
+                {% if user == product.shop.user %}
+                    <div class="border-top pt-3">
+                        <h6>Управление товаром:</h6>
+                        <div class="d-flex gap-2">
+                            <a href="{% url 'products:product_edit' product.pk %}" 
+                               class="btn btn-outline-warning btn-sm">
+                                <i class="fas fa-edit"></i> Редактировать
+                            </a>
+                            <a href="{% url 'products:product_delete' product.pk %}" 
+                               class="btn btn-outline-danger btn-sm">
+                                <i class="fas fa-trash"></i> Удалить
+                            </a>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
         </div>
     </div>
-    <h2 class="mb-4">Отзывы</h2>
-    {% if product.reviews.exists %}
-        {% for review in product.reviews.all %}
-            <div class="card mb-3">
+    
+    <!-- Product Description -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card shadow-custom">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-info-circle"></i> Описание товара
+                    </h5>
+                </div>
                 <div class="card-body">
-                    <p><strong>{{ review.user.email }}</strong> ({{ review.rating }}/5)</p>
-                    <p>{{ review.comment|default:"Без комментария" }}</p>
-                    <p><small class="text-muted">Опубликовано: {{ review.created_at }}</small></p>
+                    {% if product.description %}
+                        <p>{{ product.description|linebreaks }}</p>
+                    {% else %}
+                        <p class="text-muted">Описание товара не указано</p>
+                    {% endif %}
                 </div>
             </div>
-        {% empty %}
-            <p>Отзывов пока нет.</p>
-        {% endfor %}
-    {% else %}
-        <p>Отзывов пока нет.</p>
-    {% endif %}
+        </div>
+    </div>
+    
+    <!-- Reviews -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card shadow-custom">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="fas fa-comments"></i> Отзывы ({{ product.reviews.count }})
+                    </h5>
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'reviews:review_create' product.pk %}" 
+                           class="btn btn-primary btn-sm">
+                            <i class="fas fa-plus"></i> Добавить отзыв
+                        </a>
+                    {% endif %}
+                </div>
+                <div class="card-body">
+                    {% if product.reviews.exists %}
+                        {% for review in product.reviews.all %}
+                            <div class="review-card">
+                                <div class="review-header">
+                                    <div>
+                                        <strong class="review-author">
+                                            {{ review.user.first_name }} {{ review.user.last_name }}
+                                        </strong>
+                                        <div class="rating d-inline-block ms-2" data-rating="{{ review.rating }}">
+                                            {% for i in "12345" %}
+                                                <i class="star far fa-star"></i>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                    <small class="review-date">{{ review.created_at|date:"d.m.Y H:i" }}</small>
+                                </div>
+                                {% if review.comment %}
+                                    <p class="review-comment">{{ review.comment }}</p>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-comment-slash fa-2x text-muted mb-3"></i>
+                            <p class="text-muted">Пока нет отзывов на этот товар</p>
+                            {% if user.is_authenticated %}
+                                <a href="{% url 'reviews:review_create' product.pk %}" 
+                                   class="btn btn-primary">
+                                    <i class="fas fa-star"></i> Оставить первый отзыв
+                                </a>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}

@@ -84,3 +84,15 @@ def order_create(request):
 def order_list(request):
     orders = request.user.orders.all().prefetch_related('items__product__shop')
     return render(request, 'orders/order_list.html', {'orders': orders})
+
+
+@login_required
+def order_cancel(request, pk):
+    order = get_object_or_404(Order, pk=pk, user=request.user)
+    if order.status != 'pending':
+        messages.error(request, 'Нельзя отменить заказ с текущим статусом.')
+        return redirect('orders:order_list')
+    order.status = 'cancelled'
+    order.save()
+    messages.success(request, 'Заказ успешно отменён.')
+    return redirect('orders:order_list')

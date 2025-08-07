@@ -1,15 +1,51 @@
 {% extends 'base.html' %}
-{% block title %}Удаление товара - Markethub{% endblock %}
+{% load static %}
+
+{% block title %}Удалить товар - Markethub{% endblock %}
+
 {% block content %}
-    <h1 class="mb-4">Удаление товара</h1>
-    <div class="card mb-4">
-        <div class="card-body">
-            <p>Вы уверены, что хотите удалить товар <strong>{{ product.name }}</strong>?</p>
-            <form method="post">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-danger">Удалить</button>
-                <a href="{% url 'shops:shop_detail' product.shop.pk %}" class="btn btn-secondary">Отмена</a>
-            </form>
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-custom border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-exclamation-triangle"></i> Подтверждение удаления
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-4">
+                        {% if object.main_image %}
+                            <img src="{{ object.main_image.url }}" 
+                                 alt="{{ object.name }}" 
+                                 class="img-thumbnail mb-3"
+                                 style="max-width: 200px;">
+                        {% endif %}
+                        <h5>{{ object.name }}</h5>
+                        <p class="text-muted">{{ object.price }} ₽</p>
+                    </div>
+                    
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <strong>Внимание!</strong> Вы действительно хотите удалить этот товар? 
+                        Это действие нельзя будет отменить.
+                    </div>
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="d-flex gap-2 justify-content-center">
+                            <a href="{% url 'products:product_detail' object.pk %}" 
+                               class="btn btn-outline-secondary">
+                                <i class="fas fa-times"></i> Отмена
+                            </a>
+                            <button type="submit" class="btn btn-danger">
+                                <i class="fas fa-trash"></i> Удалить товар
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
     </div>
+</div>
 {% endblock %}

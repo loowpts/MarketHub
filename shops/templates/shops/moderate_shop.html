@@ -1,22 +1,149 @@
 {% extends 'base.html' %}
-{% block title %}Модерация магазина {{ moderation_request.shop.name }}{% endblock %}
+{% load static %}
+
+{% block title %}Модерация магазинов - Markethub{% endblock %}
+
 {% block content %}
-    <h1 class="mb-4">Модерация магазина {{ moderation_request.shop.name }}</h1>
-    <div class="card mb-4">
-        <div class="card-body">
-            <p><strong>Название:</strong> {{ moderation_request.shop.name }}</p>
-            <p><strong>Описание:</strong> {{ moderation_request.shop.description }}</p>
-            {% if moderation_request.shop.logo %}
-                <p><strong>Логотип:</strong> <img src="{{ moderation_request.shop.logo.url }}" alt="{{ moderation_request.shop.name }}" style="max-height: 100px;"></p>
-            {% endif %}
-            <p><strong>Владелец:</strong> {{ moderation_request.shop.owner.email }}</p>
-            <p><strong>Дата подачи:</strong> {{ moderation_request.submitted_at }}</p>
-            <form method="post">
-                {% csrf_token %}
-                {{ form.as_p }}
-                <button type="submit" class="btn btn-primary mt-3">Сохранить</button>
-                <a href="{% url 'shops:shop_list' %}" class="btn btn-secondary mt-3">Назад</a>
-            </form>
-        </div>
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="h4 mb-0">
+            <i class="fas fa-gavel"></i> Модерация магазинов
+        </h2>
+        <span class="badge bg-warning fs-6">
+            {{ pending_shops.count }} на рассмотрении
+        </span>
     </div>
+
+    {% if pending_shops %}
+        <div class="row">
+            {% for shop in pending_shops %}
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card shadow-custom border-warning">
+                        <div class="card-header bg-warning text-dark">
+                            <h6 class="mb-0">
+                                <i class="fas fa-clock"></i> На модерации
+                            </h6>
+                        </div>
+                        
+                        {% if shop.logo %}
+                            <img src="{{ shop.logo.url }}" 
+                                 alt="{{ shop.name }}" 
+                                 class="card-img-top"
+                                 style="height: 150px; object-fit: cover;">
+                        {% else %}
+                            <img src="/placeholder.svg?height=150&width=300" 
+                                 alt="{{ shop.name }}" 
+                                 class="card-img-top">
+                        {% endif %}
+                        
+                        <div class="card-body">
+                            <h5 class="card-title">{{ shop.name }}</h5>
+                            <p class="card-text">{{ shop.description|truncatewords:20 }}</p>
+                            
+                            <div class="mb-3">
+                                <small class="text-muted">
+                                    <i class="fas fa-user"></i> Владелец: {{ shop.user.first_name }} {{ shop.user.last_name }}
+                                    <br>
+                                    <i class="fas fa-envelope"></i> {{ shop.user.email }}
+                                    <br>
+                                    <i class="fas fa-calendar"></i> Создан: {{ shop.created_at|date:"d.m.Y H:i" }}
+                                </small>
+                            </div>
+                            
+                            <div class="d-flex gap-2">
+                                <form method="post" action="{% url 'shops:moderate_shop' shop.pk %}" class="flex-fill">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="approve">
+                                    <button type="submit" class="btn btn-success w-100 btn-sm">
+                                        <i class="fas fa-check"></i> Одобрить
+                                    </button>
+                                </form>
+                                
+                                <form method="post" action="{% url 'shops:moderate_shop' shop.pk %}" class="flex-fill">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="reject">
+                                    <button type="submit" class="btn btn-danger w-100 btn-sm"
+                                            onclick="return confirm('Вы уверены, что хотите отклонить этот магазин?')">
+                                        <i class="fas fa-times"></i> Отклонить
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="text-center py-5">
+            <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
+            <h4>Нет магазинов на модерации</h4>
+            <p class="text-muted">Все магазины обработаны</p>
+        </div>
+    {% endif %}
+
+    <!-- Recently Moderated -->
+    {% if recent_moderated %}
+        <div class="mt-5">
+            <h5 class="mb-3">
+                <i class="fas fa-history"></i> Недавно обработанные
+            </h5>
+            
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Магазин</th>
+                            <th>Владелец</th>
+                            <th>Статус</th>
+                            <th>Дата обработки</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for shop in recent_moderated %}
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        {% if shop.logo %}
+                                            <img src="{{ shop.logo.url }}" 
+                                                 alt="{{ shop.name }}" 
+                                                 class="rounded me-2"
+                                                 style="width: 40px; height: 40px; object-fit: cover;">
+                                        {% endif %}
+                                        <div>
+                                            <strong>{{ shop.name }}</strong>
+                                            <br>
+                                            <small class="text-muted">{{ shop.description|truncatewords:5 }}</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    {{ shop.user.first_name }} {{ shop.user.last_name }}
+                                    <br>
+                                    <small class="text-muted">{{ shop.user.email }}</small>
+                                </td>
+                                <td>
+                                    <span class="badge bg-{% if shop.status == 'approved' %}success{% else %}danger{% endif %}">
+                                        {% if shop.status == 'approved' %}
+                                            <i class="fas fa-check"></i> Одобрен
+                                        {% else %}
+                                            <i class="fas fa-times"></i> Отклонен
+                                        {% endif %}
+                                    </span>
+                                </td>
+                                <td>{{ shop.updated_at|date:"d.m.Y H:i" }}</td>
+                                <td>
+                                    <a href="{% url 'shops:shop_detail' shop.pk %}" 
+                                       class="btn btn-outline-primary btn-sm">
+                                        <i class="fas fa-eye"></i> Просмотр
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    {% endif %}
+</div>
 {% endblock %}

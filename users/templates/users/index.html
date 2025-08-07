@@ -1,13 +1,359 @@
 {% extends 'base.html' %}
-{% block title %}Добро пожаловать - Markethub{% endblock %}
+{% load static %}
+
+{% block title %}Главная - Markethub 2025{% endblock %}
+
 {% block content %}
-    <h1 class="mb-4">Добро пожаловать в Markethub!</h1>
-    <p>Исследуйте наши товары и магазины, чтобы найти лучшие предложения.</p>
-    <a href="{% url 'products:product_list' %}" class="btn btn-primary mb-3">Посмотреть товары</a>
-    {% if user.is_authenticated and user.cart.items.exists %}
-        <div class="alert alert-info">
-            В вашей корзине {{ user.cart.items.count }} товар(ов). 
-            <a href="{% url 'orders:cart_detail' %}" class="alert-link">Перейти в корзину</a>.
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <div class="row align-items-center min-vh-75">
+            <div class="col-lg-6 fade-in-up">
+                <h1 class="hero-title">
+                    Добро пожаловать в будущее покупок
+                </h1>
+                <p class="hero-subtitle">
+                    Откройте для себя тысячи уникальных товаров от проверенных продавцов. 
+                    Современный маркетплейс с технологиями 2025 года.
+                </p>
+                <div class="d-flex flex-wrap gap-3 mb-4">
+                    <a href="{% url 'products:product_list' %}" class="btn btn-white btn-lg shadow-lg">
+                        <i class="fas fa-search me-2"></i> Найти товары
+                    </a>
+                    <a href="{% url 'shops:shop_list' %}" class="btn btn-outline-white btn-lg">
+                        <i class="fas fa-store me-2"></i> Магазины
+                    </a>
+                </div>
+                
+                <!-- Stats -->
+                <div class="row mt-5">
+                    <div class="col-4">
+                        <div class="text-center">
+                            <h3 class="mb-1 fw-bold">{{ products_count|default:"1000+" }}</h3>
+                            <small>Товаров</small>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="text-center">
+                            <h3 class="mb-1 fw-bold">{{ shops_count|default:"500+" }}</h3>
+                            <small>Продавцов</small>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="text-center">
+                            <h3 class="mb-1 fw-bold">{{ users_count|default:"10k+" }}</h3>
+                            <small>Покупателей</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6 text-center">
+                <div class="position-relative">
+                    <img src="/placeholder.svg?height=500&width=600&text=Markethub+2025" 
+                         alt="Markethub 2025" 
+                         class="img-fluid rounded-custom shadow-custom">
+                    <div class="position-absolute top-0 start-0 w-100 h-100 bg-gradient-primary opacity-10 rounded-custom"></div>
+                </div>
+            </div>
         </div>
-    {% endif %}
+    </div>
+</section>
+
+<div class="container">
+    <!-- Top Shops Carousel -->
+    <section class="mb-5">
+        <div class="text-center mb-5">
+            <h2 class="display-5 fw-bold mb-3">Топ магазины</h2>
+            <p class="lead text-muted">Самые популярные продавцы с наибольшим количеством заказов</p>
+        </div>
+        
+        {% if top_shops %}
+            <div id="topShopsCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="5000">
+                <div class="carousel-indicators">
+                    {% for shop in top_shops %}
+                        <button type="button" 
+                                data-bs-target="#topShopsCarousel" 
+                                data-bs-slide-to="{{ forloop.counter0 }}" 
+                                {% if forloop.first %}class="active"{% endif %}></button>
+                    {% endfor %}
+                </div>
+        
+                <div class="carousel-inner">
+                    {% for shop in top_shops %}
+                        <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                            <div class="container">
+                                <div class="row justify-content-center">
+                                    <div class="col-lg-8 col-xl-6">
+                                        <div class="shop-carousel-card">
+                                            <div class="shop-carousel-header">
+                                                <div class="shop-carousel-image">
+                                                    {% if shop.logo %}
+                                                        <img src="{{ shop.logo.url }}" 
+                                                             alt="{{ shop.name }}" 
+                                                             class="shop-carousel-logo">
+                                                    {% else %}
+                                                        <img src="/placeholder.svg?height=120&width=120&text={{ shop.name|truncatechars:3 }}" 
+                                                             alt="{{ shop.name }}" 
+                                                             class="shop-carousel-logo">
+                                                    {% endif %}
+                                                </div>
+                                                <div class="shop-carousel-info">
+                                                    <h3 class="shop-carousel-title">{{ shop.name }}</h3>
+                                                    <div class="rating mb-2" data-rating="{{ shop.rating|floatformat:0 }}">
+                                                        {% for i in "12345" %}
+                                                            <i class="star far fa-star"></i>
+                                                        {% endfor %}
+                                                        <span class="rating-text">({{ shop.reviews.count }})</span>
+                                                    </div>
+                                                    <div class="shop-carousel-badges">
+                                                        <span class="badge bg-success">
+                                                            <i class="fas fa-check me-1"></i> Проверен
+                                                        </span>
+                                                        <span class="badge bg-primary">
+                                                            <i class="fas fa-crown me-1"></i> Топ продавец
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="shop-carousel-body">
+                                                <p class="shop-carousel-description">{{ shop.description|truncatewords:25 }}</p>
+                                                
+                                                <div class="shop-carousel-stats">
+                                                    <div class="stat-item">
+                                                        <div class="stat-icon">
+                                                            <i class="fas fa-box"></i>
+                                                        </div>
+                                                        <div class="stat-content">
+                                                            <div class="stat-number">{{ shop.products.count }}</div>
+                                                            <div class="stat-label">Товаров</div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="stat-item">
+                                                        <div class="stat-icon">
+                                                            <i class="fas fa-shopping-cart"></i>
+                                                        </div>
+                                                        <div class="stat-content">
+                                                            <div class="stat-number">{{ shop.orders_count|default:"150+" }}</div>
+                                                            <div class="stat-label">Заказов</div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="stat-item">
+                                                        <div class="stat-icon">
+                                                            <i class="fas fa-users"></i>
+                                                        </div>
+                                                        <div class="stat-content">
+                                                            <div class="stat-number">{{ shop.customers_count|default:"500+" }}</div>
+                                                            <div class="stat-label">Клиентов</div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="shop-carousel-footer">
+                                                <a href="{% url 'shops:shop_detail' shop.pk %}" 
+                                                   class="btn btn-primary btn-lg shop-carousel-btn">
+                                                    <i class="fas fa-store me-2"></i> Перейти в магазин
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+        
+                <button class="carousel-control-prev" type="button" data-bs-target="#topShopsCarousel" data-bs-slide="prev">
+                    <i class="fas fa-chevron-left"></i>
+                    <span class="visually-hidden">Предыдущий</span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#topShopsCarousel" data-bs-slide="next">
+                    <i class="fas fa-chevron-right"></i>
+                    <span class="visually-hidden">Следующий</span>
+                </button>
+            </div>
+            
+            <div class="text-center mt-4">
+                <a href="{% url 'shops:shop_list' %}" class="btn btn-primary btn-lg">
+                    Все магазины <i class="fas fa-arrow-right ms-2"></i>
+                </a>
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <div class="empty-state-icon">
+                    <i class="fas fa-store-slash"></i>
+                </div>
+                <h4 class="empty-state-title">Пока нет магазинов</h4>
+                <p class="empty-state-text">Создайте свой магазин и начните продавать!</p>
+                {% if user.is_authenticated %}
+                    <a href="{% url 'shops:shop_create' %}" class="btn btn-secondary btn-lg">
+                        <i class="fas fa-plus me-2"></i> Создать магазин
+                    </a>
+                {% else %}
+                    <a href="{% url 'users:register' %}" class="btn btn-primary btn-lg">
+                        <i class="fas fa-user-plus me-2"></i> Зарегистрироваться
+                    </a>
+                {% endif %}
+            </div>
+        {% endif %}
+    </section>
+
+    <!-- Featured Shops Grid -->
+    <section class="mb-5">
+        <div class="text-center mb-5">
+            <h2 class="display-5 fw-bold mb-3">Рекомендуемые магазины</h2>
+            <p class="lead text-muted">Проверенные продавцы с лучшими отзывами</p>
+        </div>
+        
+        {% if featured_shops %}
+            <div class="row g-4 mb-4">
+                {% for shop in featured_shops %}
+                    <div class="col-md-6 col-lg-4">
+                        <div class="shop-card h-100">
+                            <div class="shop-image-container">
+                                {% if shop.logo %}
+                                    <img src="{{ shop.logo.url }}" 
+                                         alt="{{ shop.name }}" 
+                                         class="shop-logo">
+                                {% else %}
+                                    <img src="/placeholder.svg?height=180&width=350&text={{ shop.name|truncatechars:15 }}" 
+                                         alt="{{ shop.name }}" 
+                                         class="shop-logo">
+                                {% endif %}
+                            </div>
+                            
+                            <div class="card-body d-flex flex-column">
+                                <h5 class="shop-title">{{ shop.name }}</h5>
+                                <p class="shop-description flex-grow-1">{{ shop.description|truncatewords:15 }}</p>
+                                
+                                <div class="rating mb-3" data-rating="{{ shop.rating|floatformat:0 }}">
+                                    {% for i in "12345" %}
+                                        <i class="star far fa-star"></i>
+                                    {% endfor %}
+                                    <span class="rating-text">({{ shop.reviews.count }})</span>
+                                </div>
+                                
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <div class="shop-products">
+                                        <i class="fas fa-box"></i>
+                                        {{ shop.products.count }} товаров
+                                    </div>
+                                    <span class="badge bg-success">
+                                        <i class="fas fa-check"></i> Проверен
+                                    </span>
+                                </div>
+                                
+                                <a href="{% url 'shops:shop_detail' shop.pk %}" 
+                                   class="btn btn-primary mt-auto">
+                                    <i class="fas fa-store me-1"></i> Перейти
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+            
+            <div class="text-center">
+                <a href="{% url 'shops:shop_list' %}" class="btn btn-outline-primary btn-lg">
+                    Все магазины <i class="fas fa-arrow-right ms-2"></i>
+                </a>
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <div class="empty-state-icon">
+                    <i class="fas fa-store-slash"></i>
+                </div>
+                <h4 class="empty-state-title">Пока нет магазинов</h4>
+                <p class="empty-state-text">Создайте свой магазин и начните продавать!</p>
+                {% if user.is_authenticated %}
+                    <a href="{% url 'shops:shop_create' %}" class="btn btn-secondary btn-lg">
+                        <i class="fas fa-plus me-2"></i> Создать магазин
+                    </a>
+                {% else %}
+                    <a href="{% url 'users:register' %}" class="btn btn-primary btn-lg">
+                        <i class="fas fa-user-plus me-2"></i> Зарегистрироваться
+                    </a>
+                {% endif %}
+            </div>
+        {% endif %}
+    </section>
+
+    <!-- Features -->
+    <section class="mb-5">
+        <div class="text-center mb-5">
+            <h2 class="display-5 fw-bold mb-3">Почему выбирают нас</h2>
+            <p class="lead text-muted">Современные технологии для комфортных покупок</p>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="feature-card text-center">
+                    <div class="feature-icon">
+                        <div class="feature-icon-circle">
+                            <i class="fas fa-shipping-fast"></i>
+                        </div>
+                    </div>
+                    <h5 class="feature-title">Быстрая доставка</h5>
+                    <p class="feature-text">Доставляем заказы в кратчайшие сроки по всей стране с отслеживанием в реальном времени</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card text-center">
+                    <div class="feature-icon">
+                        <div class="feature-icon-circle">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                    </div>
+                    <h5 class="feature-title">Гарантия качества</h5>
+                    <p class="feature-text">Все товары проходят строгую проверку качества перед отправкой покупателю</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card text-center">
+                    <div class="feature-icon">
+                        <div class="feature-icon-circle">
+                            <i class="fas fa-headset"></i>
+                        </div>
+                    </div>
+                    <h5 class="feature-title">Поддержка 24/7</h5>
+                    <p class="feature-text">Наша служба поддержки готова помочь в любое время дня и ночи</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="mb-5">
+        <div class="cta-section">
+            <div class="cta-content">
+                <h2 class="cta-title">Готовы начать?</h2>
+                <p class="cta-subtitle">Присоединяйтесь к тысячам довольных покупателей и продавцов</p>
+                <div class="cta-buttons">
+                    {% if not user.is_authenticated %}
+                        <a href="{% url 'users:register' %}" class="btn btn-white btn-lg shadow-lg">
+                            <i class="fas fa-user-plus me-2"></i> Зарегистрироваться
+                        </a>
+                        <a href="{% url 'users:login' %}" class="btn btn-outline-white btn-lg">
+                            <i class="fas fa-sign-in-alt me-2"></i> Войти
+                        </a>
+                    {% else %}
+                        <a href="{% url 'products:product_list' %}" class="btn btn-white btn-lg shadow-lg">
+                            <i class="fas fa-shopping-bag me-2"></i> Начать покупки
+                        </a>
+                        {% if not user.is_seller %}
+                            <a href="{% url 'users:become_seller' %}" class="btn btn-outline-white btn-lg">
+                                <i class="fas fa-store me-2"></i> Стать продавцом
+                            </a>
+                        {% else %}
+                            <a href="{% url 'shops:shop_create' %}" class="btn btn-outline-white btn-lg">
+                                <i class="fas fa-store me-2"></i> Создать магазин
+                            </a>
+                        {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
 {% endblock %}

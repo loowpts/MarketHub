@@ -1,16 +1,155 @@
 {% extends 'base.html' %}
-{% block title %}Редактировать профиль{% endblock %}
+{% load static %}
+
+{% block title %}Редактировать профиль - Markethub{% endblock %}
+
 {% block content %}
-    <div class="container">
-        <h1 class="mb-4">Редактировать профиль</h1>
-        <form method="post" class="w-50">
-            {% csrf_token %}
-            {{ form.as_p }}
-            {% if form.non_field_errors %}
-                <div class="text-danger">{{ form.non_field_errors }}</div>
-            {% endif %}
-            <button type="submit" class="btn btn-primary mt-3">Сохранить</button>
-            <a href="{% url 'users:profile' %}" class="btn btn-secondary mt-3">Назад</a>
-        </form>
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-custom">
+                <div class="card-header">
+                    <h4 class="mb-0">
+                        <i class="fas fa-user-edit"></i> Редактировать профиль
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form method="post" class="needs-validation" novalidate>
+                        {% csrf_token %}
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="{{ form.first_name.id_for_label }}" class="form-label">
+                                        <i class="fas fa-user"></i> Имя *
+                                    </label>
+                                    <input type="text" 
+                                           class="form-control dotted-input" 
+                                           id="{{ form.first_name.id_for_label }}"
+                                           name="{{ form.first_name.name }}"
+                                           value="{{ form.first_name.value|default:'' }}"
+                                           required>
+                                    {% if form.first_name.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.first_name.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="{{ form.last_name.id_for_label }}" class="form-label">
+                                        <i class="fas fa-user"></i> Фамилия *
+                                    </label>
+                                    <input type="text" 
+                                           class="form-control dotted-input" 
+                                           id="{{ form.last_name.id_for_label }}"
+                                           name="{{ form.last_name.name }}"
+                                           value="{{ form.last_name.value|default:'' }}"
+                                           required>
+                                    {% if form.last_name.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.last_name.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="{{ form.email.id_for_label }}" class="form-label">
+                                <i class="fas fa-envelope"></i> Email *
+                            </label>
+                            <input type="email" 
+                                   class="form-control dotted-input" 
+                                   id="{{ form.email.id_for_label }}"
+                                   name="{{ form.email.name }}"
+                                   value="{{ form.email.value|default:'' }}"
+                                   required>
+                            {% if form.email.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.email.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        {% if not user.is_seller %}
+                            <div class="form-check mb-3">
+                                <input type="checkbox" 
+                                       class="form-check-input" 
+                                       id="become_seller"
+                                       name="become_seller">
+                                <label class="form-check-label" for="become_seller">
+                                    <i class="fas fa-store"></i> Я хочу стать продавцом
+                                </label>
+                            </div>
+                        {% endif %}
+
+                        <div class="d-flex gap-2 justify-content-end">
+                            <a href="{% url 'users:profile' %}" 
+                               class="btn btn-outline-secondary">
+                                <i class="fas fa-times"></i> Отмена
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Сохранить изменения
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Change Password -->
+            <div class="card shadow-custom mt-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-lock"></i> Изменить пароль
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" action="{% url 'users:change_password' %}" class="needs-validation" novalidate>
+                        {% csrf_token %}
+                        
+                        <div class="form-group">
+                            <label for="old_password" class="form-label">
+                                <i class="fas fa-key"></i> Текущий пароль *
+                            </label>
+                            <input type="password" 
+                                   class="form-control dotted-input" 
+                                   id="old_password"
+                                   name="old_password"
+                                   required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="new_password1" class="form-label">
+                                <i class="fas fa-lock"></i> Новый пароль *
+                            </label>
+                            <input type="password" 
+                                   class="form-control dotted-input" 
+                                   id="new_password1"
+                                   name="new_password1"
+                                   required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="new_password2" class="form-label">
+                                <i class="fas fa-lock"></i> Подтверждение нового пароля *
+                            </label>
+                            <input type="password" 
+                                   class="form-control dotted-input" 
+                                   id="new_password2"
+                                   name="new_password2"
+                                   required>
+                        </div>
+
+                        <button type="submit" class="btn btn-warning">
+                            <i class="fas fa-key"></i> Изменить пароль
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
+</div>
 {% endblock %}

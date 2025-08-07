@@ -1,25 +1,169 @@
 {% extends 'base.html' %}
+{% load static %}
+
 {% block title %}Мои заказы - Markethub{% endblock %}
+
 {% block content %}
-    <h1 class="mb-4">Мои заказы</h1>
-    {% for order in orders %}
-        <div class="card mb-4">
-            <div class="card-body">
-                <h5 class="card-title">Заказ #{{ order.id }} ({{ order.get_status_display }})</h5>
-                <p><strong>Дата:</strong> {{ order.created_at }}</p>
-                <h6>Товары:</h6>
-                <ul>
-                    {% for item in order.items.all %}
-                        <li>
-                            <a href="{% url 'products:product_detail' item.product.pk %}">{{ item.product.name }}</a>
-                            ({{ item.quantity }} шт., {{ item.price }} ₽)
-                            - Магазин: <a href="{% url 'shops:shop_detail' item.product.shop.pk %}">{{ item.product.shop.name }}</a>
-                        </li>
-                    {% endfor %}
-                </ul>
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="h4 mb-0">
+            <i class="fas fa-list"></i> Мои заказы
+        </h2>
+        <span class="badge bg-primary fs-6">{{ orders.count }} заказов</span>
+    </div>
+
+    {% if orders %}
+        {% for order in orders %}
+            <div class="order-card">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div>
+                        <h5 class="mb-1">
+                            <i class="fas fa-shopping-bag"></i> Заказ #{{ order.id }}
+                        </h5>
+                        <small class="text-muted">{{ order.created_at|date:"d.m.Y H:i" }}</small>
+                    </div>
+                    <span class="order-status status-{{ order.status }}">
+                        {% if order.status == 'pending' %}
+                            <i class="fas fa-clock"></i> В обработке
+                        {% elif order.status == 'completed' %}
+                            <i class="fas fa-check"></i> Выполнен
+                        {% else %}
+                            <i class="fas fa-times"></i> Отменен
+                        {% endif %}
+                    </span>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-8">
+                        <h6 class="mb-2">Товары в заказе:</h6>
+                        {% for item in order.items.all %}
+                            <div class="d-flex align-items-center mb-2">
+                                {% if item.product.main_image %}
+                                    <img src="{{ item.product.main_image.url }}" 
+                                         alt="{{ item.product.name }}" 
+                                         class="rounded me-2"
+                                         style="width: 40px; height: 40px; object-fit: cover;">
+                                {% endif %}
+                                <div class="flex-grow-1">
+                                    <span class="fw-medium">{{ item.product.name }}</span>
+                                    <br>
+                                    <small class="text-muted">
+                                        {{ item.quantity }} × {{ item.price }} ₽ = {{ item.get_total_price }} ₽
+                                    </small>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <div class="col-md-4 text-md-end">
+                        <div class="mb-2">
+                            <strong class="text-primary">{{ order.get_total_price }} ₽</strong>
+                        </div>
+                        
+                        <div class="d-flex gap-2 justify-content-md-end">
+                            <button class="btn btn-outline-primary btn-sm" 
+                                    data-bs-toggle="modal" 
+                                    data-bs-target="#orderModal{{ order.id }}">
+                                <i class="fas fa-eye"></i> Подробнее
+                            </button>
+                            
+                            {% if order.status == 'pending' %}
+                                <form method="post" action="{% url 'orders:order_cancel' order.id %}" class="d-inline">
+                                    {% csrf_token %}
+                                    <button type="submit" 
+                                            class="btn btn-outline-danger btn-sm"
+                                            onclick="return confirm('Отменить заказ?')">
+                                        <i class="fas fa-times"></i> Отменить
+                                    </button>
+                                </form>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
             </div>
+            
+            <!-- Order Details Modal -->
+            <div class="modal fade" id="orderModal{{ order.id }}" tabindex="-1">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">
+                                <i class="fas fa-shopping-bag"></i> Заказ #{{ order.id }}
+                            </h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <strong>Дата заказа:</strong><br>
+                                    {{ order.created_at|date:"d.m.Y H:i" }}
+                                </div>
+                                <div class="col-md-6">
+                                    <strong>Статус:</strong><br>
+                                    <span class="order-status status-{{ order.status }}">
+                                        {{ order.get_status_display }}
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <h6>Товары:</h6>
+                            <div class="table-responsive">
+                                <table class="table table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Товар</th>
+                                            <th>Цена</th>
+                                            <th>Количество</th>
+                                            <th>Сумма</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for item in order.items.all %}
+                                            <tr>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        {% if item.product.main_image %}
+                                                            <img src="{{ item.product.main_image.url }}" 
+                                                                 alt="{{ item.product.name }}" 
+                                                                 class="rounded me-2"
+                                                                 style="width: 30px; height: 30px; object-fit: cover;">
+                                                        {% endif %}
+                                                        {{ item.product.name }}
+                                                    </div>
+                                                </td>
+                                                <td>{{ item.price }} ₽</td>
+                                                <td>{{ item.quantity }}</td>
+                                                <td>{{ item.get_total_price }} ₽</td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <th colspan="3">Итого:</th>
+                                            <th>{{ order.get_total_price }} ₽</th>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                Закрыть
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <div class="text-center py-5">
+            <i class="fas fa-shopping-bag fa-3x text-muted mb-3"></i>
+            <h4>У вас пока нет заказов</h4>
+            <p class="text-muted">Оформите первый заказ в нашем магазине</p>
+            <a href="{% url 'products:product_list' %}" class="btn btn-primary">
+                <i class="fas fa-shopping-cart"></i> Перейти к покупкам
+            </a>
         </div>
-    {% empty %}
-        <p>У вас пока нет заказов.</p>
-    {% endfor %}
+    {% endif %}
+</div>
 {% endblock %}

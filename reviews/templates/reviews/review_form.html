@@ -1,28 +1,179 @@
 {% extends 'base.html' %}
-{% block title %}Добавить отзыв - {{ product.name }}{% endblock %}
+{% load static %}
+
+{% block title %}Оставить отзыв - Markethub{% endblock %}
+
 {% block content %}
-    <h1 class="mb-4">Добавить отзыв на {{ product.name }}</h1>
-    <div class="card mb-4">
-        <div class="card-body">
-            <p><strong>Товар:</strong> {{ product.name }}</p>
-            <p><strong>Магазин:</strong> <a href="{% url 'shops:shop_detail' product.shop.pk %}">{{ product.shop.name }}</a></p>
-            <form method="post">
-                {% csrf_token %}
-                {% if form.errors %}
-                    <div class="alert alert-danger">
-                        <ul>
-                            {% for field in form %}
-                                {% for error in field.errors %}
-                                    <li>{{ field.label }}: {{ error }}</li>
-                                {% endfor %}
-                            {% endfor %}
-                        </ul>
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-custom">
+                <div class="card-header">
+                    <h4 class="mb-0">
+                        <i class="fas fa-star"></i> Оставить отзыв о товаре
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <!-- Product Info -->
+                    <div class="d-flex align-items-center mb-4 p-3 bg-light rounded">
+                        {% if product.main_image %}
+                            <img src="{{ product.main_image.url }}" 
+                                 alt="{{ product.name }}" 
+                                 class="rounded me-3"
+                                 style="width: 80px; height: 80px; object-fit: cover;">
+                        {% else %}
+                            <img src="/placeholder.svg?height=80&width=80" 
+                                 alt="{{ product.name }}" 
+                                 class="rounded me-3">
+                        {% endif %}
+                        <div>
+                            <h5 class="mb-1">{{ product.name }}</h5>
+                            <p class="text-muted mb-0">{{ product.price }} ₽</p>
+                            <small class="text-muted">
+                                <i class="fas fa-store"></i> {{ product.shop.name }}
+                            </small>
+                        </div>
                     </div>
-                {% endif %}
-                {{ form.as_p }}
-                <button type="submit" class="btn btn-primary">Отправить отзыв</button>
-                <a href="{% url 'products:product_detail' product.pk %}" class="btn btn-secondary">Отмена</a>
-            </form>
+
+                    <form method="post" class="needs-validation" novalidate>
+                        {% csrf_token %}
+                        
+                        <div class="form-group">
+                            <label for="{{ form.rating.id_for_label }}" class="form-label">
+                                <i class="fas fa-star"></i> Оценка *
+                            </label>
+                            <div class="rating-input interactive-rating mb-2">
+                                {% for i in "12345" %}
+                                    <input type="radio" 
+                                           id="rating{{ i }}" 
+                                           name="{{ form.rating.name }}" 
+                                           value="{{ i }}"
+                                           class="d-none"
+                                           {% if form.rating.value == i %}checked{% endif %}
+                                           required>
+                                    <label for="rating{{ i }}" 
+                                           class="rating-star" 
+                                           data-rating="{{ i }}">
+                                        <i class="far fa-star"></i>
+                                    </label>
+                                {% endfor %}
+                            </div>
+                            <small class="text-muted">Нажмите на звездочки для выбора оценки</small>
+                            {% if form.rating.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.rating.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="form-group">
+                            <label for="{{ form.comment.id_for_label }}" class="form-label">
+                                <i class="fas fa-comment"></i> Комментарий
+                            </label>
+                            <textarea class="form-control dotted-input" 
+                                      id="{{ form.comment.id_for_label }}"
+                                      name="{{ form.comment.name }}"
+                                      rows="4"
+                                      placeholder="Поделитесь своим мнением о товаре...">{{ form.comment.value|default:'' }}</textarea>
+                            <small class="form-text text-muted">
+                                Расскажите о качестве товара, доставке, упаковке и других важных моментах
+                            </small>
+                            {% if form.comment.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.comment.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i>
+                            <strong>Обратите внимание:</strong> Отзыв будет виден всем пользователям. 
+                            Пожалуйста, будьте объективны и конструктивны в своих комментариях.
+                        </div>
+
+                        <div class="d-flex gap-2 justify-content-end">
+                            <a href="{% url 'products:product_detail' product.pk %}" 
+                               class="btn btn-outline-secondary">
+                                <i class="fas fa-times"></i> Отмена
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-paper-plane"></i> Отправить отзыв
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
     </div>
+</div>
+
+<style>
+.rating-input {
+    display: flex;
+    gap: 0.25rem;
+}
+
+.rating-star {
+    font-size: 1.5rem;
+    color: #dee2e6;
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+.rating-star:hover,
+.rating-star.active {
+    color: #ffc107;
+}
+
+.rating-input input[type="radio"]:checked ~ .rating-star,
+.rating-input input[type="radio"]:checked + .rating-star {
+    color: #ffc107;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const ratingStars = document.querySelectorAll('.rating-star');
+    
+    ratingStars.forEach((star, index) => {
+        star.addEventListener('click', function() {
+            const rating = this.dataset.rating;
+            
+            // Update visual state
+            ratingStars.forEach((s, i) => {
+                if (i < rating) {
+                    s.classList.add('active');
+                } else {
+                    s.classList.remove('active');
+                }
+            });
+        });
+        
+        star.addEventListener('mouseenter', function() {
+            const rating = this.dataset.rating;
+            
+            ratingStars.forEach((s, i) => {
+                if (i < rating) {
+                    s.style.color = '#ffc107';
+                } else {
+                    s.style.color = '#dee2e6';
+                }
+            });
+        });
+    });
+    
+    document.querySelector('.rating-input').addEventListener('mouseleave', function() {
+        const checkedInput = document.querySelector('input[name="rating"]:checked');
+        const checkedRating = checkedInput ? checkedInput.value : 0;
+        
+        ratingStars.forEach((s, i) => {
+            if (i < checkedRating) {
+                s.style.color = '#ffc107';
+            } else {
+                s.style.color = '#dee2e6';
+            }
+        });
+    });
+});
+</script>
 {% endblock %}
